@@ -1,0 +1,373 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color:#000033 ;
+    color: #303C6C;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Indie Flower', cursive;
+    max-height: 100vh;
+    min-height: 100vh;
+}
+
+
+/* Green borders, margins, and navy blue background */
+
+header, aside, #sketch-holder, footer {
+    margin: 2px;
+}
+
+
+/* Page content */
+
+header {
+    padding: 14px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #66FCF1;
+    margin: 0;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+}
+
+p {
+    color: #66FCF1;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+}
+
+a:link, a:visited {
+    color: #303C6C;
+}
+
+#left-asides, #right-asides {
+    display: flex;
+    flex-direction: column;
+}
+
+#left-asides {
+    margin-left: 2px;
+}
+
+#right-asides {
+    margin-right: 2px;
+    min-width: 195px;
+}
+
+aside {
+    padding: 14px;
+}
+
+
+.group p:last-of-type {
+    margin-top: 0;
+}
+
+#store {
+    flex: 1;
+}
+
+#store button, #map-aside button {
+    min-width: 100%;
+    text-align: center;
+    text-shadow: none;
+}
+
+#sketch-holder {
+    background-color: #000;
+    flex: 1;
+    margin: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+canvas {
+    bottom: 0;
+    display: block;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+button, select {
+    background-color: #5D001E;
+    color: #E3E2DF;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.85em;
+    text-shadow: 0.5px 0.5px 0 #000;
+}
+
+button {
+    height: 30px;
+}
+
+.horiz-buttons {
+    display: flex;
+    flex-direction: column;
+    width: 75%;
+}
+
+.horiz-buttons button {
+    color: #E3E2DF;
+    margin-top:5%;
+    display: block;
+    flex: 1;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+}
+
+#status {
+    font-size: 0.95em;
+}
+
+#info {
+    flex: 1;
+}
+
+#info-div {
+    display: none;
+    margin: 0;
+}
+
+#info p {
+    font-size: 0.8em;
+}
+
+#info-buttons button {
+    color: #E3E2DF;
+    font-size: 0.8em;
+    text-shadow: none;
+}
+
+
+/* Misc. buttons */
+
+.io {
+    background-color: rgb(224, 130, 131);
+}
+
+/*#sell {
+    background-color:#D3D3D3;;
+ background-color: rgb(248, 148, 6); 
+}*/
+
+#upgrade {
+    background-color: rgb(25, 181, 254);
+}
+
+
+/* Tower types */
+
+/*#weak {
+    background-color: rgb(249, 191, 59);
+}
+
+#strong {
+    background-color: rgb(25, 181, 254);
+}
+
+#stronger {
+    background-color: rgb(68, 108, 179);
+}
+
+#strongFast {
+    background-color: rgb(207, 0, 15);
+}
+
+#tank {
+    background-color: rgb(30, 130, 76);
+}
+
+#fast {
+    background-color: rgb(102, 51, 153);
+}
+
+#faster {
+    background-color: rgb(255, 255, 0);
+}*/
+
+.Unit {
+    margin: 5%;
+    background-color: #5D001E;
+    color: #E3E2DF;
+    border: none;
+    border-radius: 8px;
+}
+
+@import url(https://fonts.googleapis.com/css?family=Indie+Flower);
+* {
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 50px 0;
+  font-family: 'Indie Flower', cursive;
+  font-size: 48px;
+  font-weight: normal;
+  text-align: center;
+}
+
+.btn-container {
+  position: relative;
+  display:none;
+}
+
+#recruit {
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  background-color: #5D001E;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Indie Flower', cursive;
+  font-size: 22px;
+  font-weight: normal;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  position: relative;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: -webkit-transform;
+  transition-property: transform;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  -webkit-transform: translateY(-6px);
+  -ms-transform: translateY(-6px);
+  transform: translateY(-6px);
+  -webkit-animation-name: hover;
+  animation-name: hover;
+  -webkit-animation-duration: 1.5s;
+  animation-duration: 1.5s;
+  -webkit-animation-delay: 0.3s;
+  animation-delay: 0.3s;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  -webkit-animation-direction: alternate;
+  animation-direction: alternate;
+}
+#recruit:before {
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  content: '';
+  top: 100%;
+  left: 5%;
+  height: 10px;
+  width: 90%;
+  opacity: 0;
+  background: -webkit-radial-gradient(center, ellipse, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 80%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 80%);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: -webkit-transform, opacity;
+  transition-property: transform, opacity;
+  opacity: .4;
+  -webkit-transform: translateY(6px);
+  -ms-transform: translateY(6px);
+  transform: translateY(6px);
+  -webkit-animation-name: hover-shadow;
+  animation-name: hover-shadow;
+  -webkit-animation-duration: 1.5s;
+  animation-duration: 1.5s;
+  -webkit-animation-delay: .3s;
+  animation-delay: .3s;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  -webkit-animation-direction: alternate;
+  animation-direction: alternate;
+}
+#recruit:hover {
+  background-color: #e16e50;
+}
+
+@keyframes hover {
+  50% {
+    -webkit-transform: translateY(-3px);
+    -ms-transform: translateY(-3px);
+    transform: translateY(-3px);
+  }
+  100% {
+    -webkit-transform: translateY(-6px);
+    -ms-transform: translateY(-6px);
+    transform: translateY(-6px);
+  }
+}
+@-webkit-keyframes hover-shadow {
+  0% {
+    -webkit-transform: translateY(6px);
+    transform: translateY(6px);
+    opacity: .4;
+  }
+  50% {
+    -webkit-transform: translateY(3px);
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: translateY(6px);
+    transform: translateY(6px);
+    opacity: .4;
+  }
+}
+@keyframes hover-shadow {
+  0% {
+    -webkit-transform: translateY(6px);
+    -ms-transform: translateY(6px);
+    transform: translateY(6px);
+    opacity: .4;
+  }
+  50% {
+    -webkit-transform: translateY(3px);
+    -ms-transform: translateY(3px);
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: translateY(6px);
+    -ms-transform: translateY(6px);
+    transform: translateY(6px);
+    opacity: .4;
+  }
+}
+@-webkit-keyframes hover {
+  50% {
+    -webkit-transform: translateY(-3px);
+    transform: translateY(-3px);
+  }
+  100% {
+    -webkit-transform: translateY(-6px);
+    transform: translateY(-6px);
+  }
+}
+@keyframes hover {
+  50% {
+    -webkit-transform: translateY(-3px);
+    -ms-transform: translateY(-3px);
+    transform: translateY(-3px);
+  }
+  100% {
+    -webkit-transform: translateY(-6px);
+    -ms-transform: translateY(-6px);
+    transform: translateY(-6px);
+  }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Tower Attack</title>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/lib/lz-string.min.js" defer></script>
+    <script src="scripts/lib/p5.min.js" defer></script>
+    <script src="scripts/lib/p5.sound.min.js" defer></script>
+    <script src="scripts/utils.js" defer></script>
+    <script src="scripts/unit.js" defer></script>
+    <script src="scripts/units.js" defer></script>
+    <script src="scripts/particle.js" defer></script>
+    <script src="scripts/particle_system.js" defer></script>
+    <script src="scripts/effect.js" defer></script>
+    <script src="scripts/effects.js" defer></script> 
+    <script src="scripts/tower.js" defer></script>
+    <script src="scripts/towers.js" defer></script>
+    <script src="scripts/missile.js" defer></script> 
+    <script src="scripts/bullet.js" defer></script> 
+    <script src="scripts/maps.js" defer></script>
+    <script src="scripts/tiles.js" defer></script> 
+    <script src="scripts/sketch.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1 style="margin:10px">Tower Attack</h1>
+    </header>
+
+    <main>
+      <div id="left-asides">
+        <aside id="store">
+          <h2>Shop</h2><br>
+          <div class="group">
+            <p><button class="Unit" id="weak">Weak Unit</button></p>
+            <p><button class="Unit" id="strong">Strong Unit</button></p>
+            <p><button class="Unit" id='fast'>Fast Unit</button></p>
+            <p><button class="Unit" id='blend'>Blend Unit</button></p>
+            <p><button class="Unit" id="stronger">Stronger Unit</button></p>
+            <p><button class="Unit" id='faster'>Faster Unit</button></p>
+            <p><button class="Unit" id='tank'>Tank Unit</button></p>
+            <p><button class="Unit" id='medic'>Medic Unit</button></p>
+            <p><button class="Unit" id='regen'>Regen Unit</button></p>
+            <p><button class="Unit" id='taunt'>Aggro Unit</button></p>
+            <p><button class="Unit" id='spawner'>Spawner Unit</button></p>
+          </div>
+        </aside>
+      </div>
+
+      <div id="sketch-holder"></div>
+
+      <div id="right-asides">
+        <aside id="status">
+          <p id="wave"></p>
+          <p id="health"></p>
+          <p id="cash"></p><br>
+          <div class="horiz-buttons">
+            <button id="pause" onclick="pause()">Start</button>
+            <button onclick="resetGame()">Restart</button>
+          </div>
+        </aside>
+
+        <aside id="info">
+          <div id="info-div">
+            <h3 id="name"></h3>
+            <p id="cost"></p>
+            <p id="sellPrice"></p>
+            <p id="upPrice"></p>
+            <p id="damage"></p>
+            <p id="type"></p>
+            <p id="range"></p>
+            <p id="cooldown"></p><br>
+            <div class="horiz-buttons" id="info-buttons">
+              <button id="sell" onclick="if (selected) sell(selected)">Sabotage</button>
+            </div>
+          </div>
+        </aside>
+      <aside id="unit_info" style="display:none">
+      <h2 id="unitName" style="margin:20px 5px"></h2>
+        <div style="padding-left:4%; padding-bottom:10%" id="weak-div">
+                <p id="unitCost"></p>
+                <p id="unitHealth"></p>
+                <p id="unitResistance"></p>
+                <p id="unitWeakness"></p>
+                <p id="unitSpeed"></p>
+                <p id="taunts"></p>
+                <p id="unitDamage"></p>
+                <p id="upgradePrice"></p>
+        </div>
+        <div id="left-asides" style="padding-bottom:4%; padding-top;10%">
+             <div id="recruit-container" class="btn-container">
+              <a href="#" id='recruit' style="width: match-parent">RECRUIT</a>
+             </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+    <footer style="padding:2%"></footer>
+  </body>
+</html>
