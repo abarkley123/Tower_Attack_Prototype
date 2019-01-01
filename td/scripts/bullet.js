@@ -20,7 +20,7 @@ class Bullet {
         this.damageMin = t.damageMin;
         this.lifetime = 60;
         this.range = 7;
-        this.topSpeed = (4 * 24) / ts;
+        this.topSpeed = (10 * 24) / ts;
         this.canSteer = false;
         this.final = createVector(0, 0);
         this.resolveToTarget();

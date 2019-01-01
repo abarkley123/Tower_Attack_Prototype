@@ -454,10 +454,8 @@ function recalculate() {
     paths = newPaths;
 }
 
-// TODO vary health based on map
 function resetGame() {
     loadMap();
-    // Clear all entities
     units = [];
     projectiles = [];
     systems = [];
@@ -465,51 +463,23 @@ function resetGame() {
     newUnits = [];
     newProjectiles = [];
     newTowers = [];
-    // Reset all stats
-    health = 40;
-    maxHealth = health;
-    wave = 0;
-    // Reset all flags
     paused = true;
-    ticks_till_spawn = 0;
-    toCooldown = false;
     toPathfind = false;
-    toPlace = false;
-    // Start game
-    createTowers(0);
-}
-
-function startNextRound() {
-    // Clear all entities
-    units = [];
-    projectiles = [];
-    systems = [];
-    towers = [];
-    newUnits = [];
-    newProjectiles = [];
-    newTowers = [];
-    // Reset all stats
-    health = floor(maxHealth * 1.05);
-    maxHealth = health;
-    wave++;
-    // Reset all flags
-    paused = true;
-    ticks_till_spawn = 0;
-    toCooldown = false;
-    toPathfind = false;
-    toPlace = false;
-    // Start game
     selected = null;
     towerCenter = null;
     sabotagedTowers = 0;
+    if (wave !== undefined) {
+        health = floor(maxHealth * 1.05);
+        wave++;
+    } else {
+        health = 40;
+        wave = 0;
+    }
+    maxHealth = health;
     createTowers(wave);
-
-    walkMap = getWalkMap();
-    generateExit(walkMap);
-    generateSpawns(walkMap);
 }
 
-// Changes tile size to fit everything onscreen
+//Forces tile-size to acceptable value, scales canvas accordingly.
 function resizeFit() {
     var div = document.getElementById('sketch-holder');
     var ts1 = floor(div.offsetWidth / 35);
@@ -520,7 +490,7 @@ function resizeFit() {
     document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
-// Resizes cols, rows, and canvas ased on tile size
+//Determines number of cols, rows based on viewport sizes, scales canvas accordingly.
 function resizeMax() {
     var div = document.getElementById('sketch-holder');
     cols = floor(div.offsetWidth / ts);
@@ -538,7 +508,7 @@ function resizeMax() {
     document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
-// Sell a tower
+// Sell a tower - functions to sabotage currently
 function sell(t) {
     if (cash > t.sellPrice()) {
         selected = null;
@@ -552,7 +522,6 @@ function sell(t) {
     }
 }
 
-// Visualize range of tower
 function showTowerRange(t, cx, cy) {
     stroke(255);
     fill(t.color[0], t.color[1], t.color[2], 63);
@@ -644,43 +613,32 @@ function preload() {
         resetGame();
     }
 
-// TODO show range of selected tower
-    function draw() {
-        background(bg);
+//Draw function for all game objects. 
+//TODO - make this more performant.
+//TODO - separate update and draw methods (limitations of p5 here - call update in first line of draw?)
+function draw() {
+    background(bg);
 
-        // Update game status
-        updatePause();
-        updateStatus();
+    // Update game status
+    updatePause();
+    updateStatus();
 
-        // Update spawn and wave cooldown
-        if (!paused) {
-            if (ticks_till_spawn > 0) ticks_till_spawn--;
-            if (ticks_till_wave > 0 && toWait) ticks_till_wave--;
-        }
-
-        // Draw basic tiles
-        // noStroke();
-        // fill(205, 92, 92);
-        // rect(0, 0, cols * ts, rows * ts);
-
-     
-            let counter = 1;
-            for (var x = 0; x < cols; x++) {
-                for (var y = 0; y < rows; y++) {
-                    var t = tiles[display[x][y]];
-                    if (typeof t === 'function') {
-                        t(x, y, displayDir[x][y]);
-                    } else {
-                        if (t) {
-                            fill(51, 0, 0);
-                            if (++counter % 2 !== 0 | x > y | y > x) {
-                                rect(x * ts, y * ts, ts, ts);
-                            }
-                        } 
+    let counter = 1;
+    for (var x = 0; x < cols; x++) {
+        for (var y = 0; y < rows; y++) {
+            var t = tiles[display[x][y]];
+            if (typeof t === 'function') {
+                t(x, y, displayDir[x][y]);
+            } else {
+                if (t) {
+                    fill(51, 0, 0);
+                    if (++counter % 2 !== 0 | x > y | y > x) {
+                         rect(x * ts, y * ts, ts, ts);
                     }
-                }
+                } 
             }
-
+        }
+    }
 
         // Draw spawnpoints
         for (var i = 0; i < spawnpoints.length; i++) {
@@ -816,14 +774,14 @@ function preload() {
         newTowers = [];
 
         // If player is dead, reset game
-        if (health <= 0) startNextRound();
+        if (health <= 0) resetGame();
 
         // Recalculate pathfinding
         if (toPathfind) {
             recalculate();
             toPathfind = false;
-        }
     }
+}
 
 function mousePressed() {
     if (!mouseInMap()) return;
