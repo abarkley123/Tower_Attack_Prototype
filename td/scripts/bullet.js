@@ -54,7 +54,6 @@ class Bullet {
     explode() {
         this.kill();
         let inRadius = getInRange(this.pos.x, this.pos.y, this.blastRadius, units);
-        console.log(inRadius);
         for (var i = 0; i < inRadius.length; i++) {
             var e = inRadius[i];
             if (inRange(e.pos.x, e.pos.y, this.pos.x, this.pos.y)) {
@@ -111,7 +110,6 @@ class Bullet {
         if (this.lifetime > 0) {
             this.lifetime--;
             if (inRange(this.target.x, this.target.y, this.pos.x, this.pos.y)) {
-                console.log('exploding due to proximity.');
                 this.explode();
             }
         } else {

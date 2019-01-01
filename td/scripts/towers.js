@@ -61,12 +61,11 @@ tower.gun = {
         if (stopFiring) return;
         if (!this.canFire()) return;
         let bullet = new Bullet(this.pos.x, this.pos.y, e);
-        if (this.allowsSteer) bullet.setSteer(true);
+        //if (bullet.allowsSteer)
+        bullet.setSteer(true);
         if (this.canFire() || this.follow) {
             //we need to predict where to shoot, not 100% accurate so gives interesting effect
-            const bulletTrajectory = determineNextPoint(bullet);
-            bullet.setVel(createVector(bulletTrajectory.x, bulletTrajectory.y);
-            this.aim(bulletTrajectory.x + e.pos.x, bulletTrajectory.y + e.pos.y);
+            this.aim(e.pos.x, e.pos.y);
         }
         this.resetCooldown();
         projectiles.push(bullet);
@@ -186,6 +185,60 @@ tower.slow = {
     },
     update() {
         this.angle += PI / 60;
+        if (this.cd > 0) this.cd--;
+    },
+    // Upgrades
+    upgrades: [
+        {
+            // Display
+            color: [102, 204, 26],
+            radius: 0.9,
+            // Misc
+            name: 'poison',
+            title: 'Poison Tower',
+            // Stats
+            cooldownMax: 60,
+            cooldownMin: 60,
+            cost: 150,
+            range: 2,
+            type: 'poison',
+            // Methods
+            onHit: function(e) {
+                e.applyEffect('poison', 60);
+            }
+        }
+    ]
+};
+
+tower.rotator = {
+    // Display
+    baseOnTop: false,
+    color: [150, 35, 90],
+    attackColor: [74, 35, 90],
+    length: 0.8,
+    radius: 0.8,
+    secondary: [149, 165, 166],
+    width: 0.25,
+    weight:6,
+    // Misc
+    name: 'rotator',
+    title: 'Rotator Tower',
+    // Stats
+    cooldownMax: 1,
+    cost: 75,
+    damageMax: 3,
+    range: 2,
+    type: 'energy',
+    // Methods
+    drawBarrel: function() {
+        stroke(this.border);
+        fill(this.secondary);
+        var back = -this.length * ts / 2;
+        var side = this.width * ts / 2;
+        rect(back, -side, this.length * ts, this.width * ts);
+    },
+    update() {
+        this.angle -= PI / 60;
         if (this.cd > 0) this.cd--;
     },
     // Upgrades

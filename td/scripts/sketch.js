@@ -319,13 +319,13 @@ function createTowers(roundNum) {
     if (!(roundNum > 0)) {
         roundNum = 0;
     }
-    var tierSet = ['gun', 'laser', 'slow', 'sniper', 'rocket', 'bomb', 'tesla'];
+    var tierSet = ['gun', 'laser', 'slow', 'rotator', 'sniper', 'rocket', 'bomb', 'tesla'];
     let maximumTowers = 10;
     let maximumTier = 1;
     maximumTowers = 5 + (3*(roundNum+1));
     maximumTier = floor(++roundNum/2);
-    if (maximumTier > 7) {
-        maximumTier = 7;
+    if (maximumTier > 8) {
+        maximumTier = 8;
     } else if (maximumTier < 1) {
         maximumTier = 1;
     }
@@ -370,7 +370,7 @@ function canUpgrade(roundNum, maximumTier, randomTier) {
 function loadSounds() {
     sounds = {};
     
-    // Missile explosion
+    //Missile explosion
     sounds.boom = loadSound('sounds/boom.wav');
     sounds.boom.setVolume(0.3);
 
@@ -379,7 +379,7 @@ function loadSounds() {
     sounds.missile.setVolume(0.3);
 
     // Enemy death
-    sounds.pop = loadSound('sounds/pop.wav');
+    sounds.pop = loadSound('sounds/pop_sound.mp3');
     sounds.pop.setVolume(0.4);
 
     // Railgun
@@ -697,200 +697,203 @@ function walkable(col, row) {
 // Main p5 functions
 
 function preload() {
-    loadSounds();
+    try {
+        soundFormats('mp3', 'wav');
+        loadSounds();
+    } catch(NoSuchBufferException) {
+        console.log("Buffer is undefined.");
+    }
 }
 
-function setup() {
-    var div = document.getElementById('sketch-holder');
-    var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
-    canvas.parent('sketch-holder');
-    resetGame();
-}
+
+    function setup() {
+        var div = document.getElementById('sketch-holder');
+        console.log(div.offsetWidth);
+        var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+        canvas.parent('sketch-holder');
+        resetGame();
+    }
 
 // TODO show range of selected tower
-function draw() {
-    background(bg);
+    function draw() {
+        background(bg);
 
-    // Update game status
-    updatePause();
-    updateStatus();
+        // Update game status
+        updatePause();
+        updateStatus();
 
-    // Update spawn and wave cooldown
-    if (!paused) {
-        if (ticks_till_spawn > 0) ticks_till_spawn--;
-        if (ticks_till_wave > 0 && toWait) ticks_till_wave--;
-    }
-
-    // Draw basic tiles
-    let counter = 1;
-    for (var x = 0; x < cols; x++) {
-        for (var y = 0; y < rows; y++) {
-            var t = tiles[display[x][y]];
-            if (typeof t === 'function') {
-                t(x, y, displayDir[x][y]);
-            } else {
-                noStroke();
-                fill(205, 92, 92);
-                rect(x * ts, y * ts, ts, ts);
-                if (t) {
-                    fill(51, 0, 0);
-                    var mid = 0.2 * ts / 2;
-                    var base = 0.3 * ts;
-                    var tip = 0.3 * ts + 0.2 * ts * 2;
-                    var side = 0.2 * ts;
-                    if (++counter % 2 === 0) {
-                        triangle(x * ts, y * ts + ts, 
-                        x * ts + 0.5 * ts, y * ts, 
-                        x * ts + 1 * ts, y * ts + ts);
-                    } else {
-                        rect(x * ts, y * ts, ts, ts);
-                    }
-                } 
-            }
+        // Update spawn and wave cooldown
+        if (!paused) {
+            if (ticks_till_spawn > 0) ticks_till_spawn--;
+            if (ticks_till_wave > 0 && toWait) ticks_till_wave--;
         }
-    }
 
-    // Draw spawnpoints
-    for (var i = 0; i < spawnpoints.length; i++) {
+        // Draw basic tiles
+        noStroke();
+        fill(205, 92, 92);
+        rect(0, 0, cols * ts, rows * ts);
+
+     
+            let counter = 1;
+            for (var x = 0; x < cols; x++) {
+                for (var y = 0; y < rows; y++) {
+                    var t = tiles[display[x][y]];
+                    if (typeof t === 'function') {
+                        t(x, y, displayDir[x][y]);
+                    } else {
+                        if (t) {
+                            fill(51, 0, 0);
+                            if (++counter % 2 !== 0 | x > y | y > x) {
+                                rect(x * ts, y * ts, ts, ts);
+                            }
+                        } 
+                    }
+                }
+            }
+
+
+        // Draw spawnpoints
+        for (var i = 0; i < spawnpoints.length; i++) {
+            stroke(255);
+            var s = spawnpoints[i];
+            fill(154, 125, 10);
+            rect(s.x * ts, s.y * ts, ts, ts);
+            fill(241, 196, 15);
+            ellipse(s.x * ts + 0.5 * ts, s.y * ts + 0.5 * ts, ts, ts);
+            fill(207, 0, 15);
+            stroke(207, 0, 15);
+            line(s.x * ts, s.y * ts, s.x * ts + ts, s.y * ts + ts);
+        }
+
+        // Draw exit
         stroke(255);
-        var s = spawnpoints[i];
-        fill(154, 125, 10);
-        rect(s.x * ts, s.y * ts, ts, ts);
-        fill(241, 196, 15);
-        ellipse(s.x * ts + 0.5 * ts, s.y * ts + 0.5 * ts, ts, ts);
-        fill(207, 0, 15);
-        stroke(207, 0, 15);
-        line(s.x * ts, s.y * ts, s.x * ts + ts, s.y * ts + ts);
-    }
+        fill(20, 90, 50);
+        ellipse(exit.x * ts + 0.5 * ts, exit.y * ts + 0.5 * ts, ts, ts);
 
-    // Draw exit
-    stroke(255);
-    fill(20, 90, 50);
-    ellipse(exit.x * ts + 0.5 * ts, exit.y * ts + 0.5 * ts, ts, ts);
+        // Spawn units
+        if (newUnits.length > 0 && !paused) {
+            // Spawn same unit for each spawnpoint
 
-    // Spawn units
-    if (newUnits.length > 0 && !paused) {
-        // Spawn same unit for each spawnpoint
-
-        if (tempSpawns.length > 0) {
-                const name = newUnits.pop();
-                for (let i = 0; i < tempSpawns.length; i++) {
-                    var s = tempSpawns[i];
-                    if (s[1] === 0) continue;
-                    s[1]--;
-                    var c = center(s[0].x, s[0].y);   
+            if (tempSpawns.length > 0) {
+                    const name = newUnits.pop();
+                    for (let i = 0; i < tempSpawns.length; i++) {
+                        var s = tempSpawns[i];
+                        if (s[1] === 0) continue;
+                        s[1]--;
+                        var c = center(s[0].x, s[0].y);   
+                        units.push(createUnit(c.x, c.y, unit[name]));
+                    }
+            } else {
+                const name = newUnits.shift();
+                for (var i = 0; i < spawnpoints.length; i++) {
+                    var s = spawnpoints[i];
+                    var c = center(s.x, s.y);
+                    fill(205, 92, 92);
                     units.push(createUnit(c.x, c.y, unit[name]));
                 }
-        } else {
-            const name = newUnits.shift();
-            for (var i = 0; i < spawnpoints.length; i++) {
-                var s = spawnpoints[i];
-                var c = center(s.x, s.y);
-                units.push(createUnit(c.x, c.y, unit[name]));
             }
         }
-    }
 
-    if (tempSpawns.length > 0 && newUnits.length == 0) removeTempSpawns();
-    // Update and draw units
-    for (let i = units.length - 1; i >= 0; i--) {
-        let e = units[i];
+        if (tempSpawns.length > 0 && newUnits.length == 0) removeTempSpawns();
+        // Update and draw units
+        for (let i = units.length - 1; i >= 0; i--) {
+            let e = units[i];
 
-        // Update direction and position
-        if (!paused) {
-            e.steer();
-            e.update();
-            e.onTick();
+            // Update direction and position
+            if (!paused) {
+                e.steer();
+                e.update();
+                e.onTick();
+            }
+
+            // Kill if outside map
+            if (outsideMap(e)) e.kill();
+
+            // If at exit tile, kill and reduce player health
+            if (atTileCenter(e.pos.x, e.pos.y, exit.x, exit.y)) e.onExit();
+
+            // Draw
+            e.draw();
+
+            if (e.isDead()) units.splice(i, 1);
         }
 
-        // Kill if outside map
-        if (outsideMap(e)) e.kill();
-
-        // If at exit tile, kill and reduce player health
-        if (atTileCenter(e.pos.x, e.pos.y, exit.x, exit.y)) e.onExit();
-
-        // Draw
-        e.draw();
-
-        if (e.isDead()) units.splice(i, 1);
-    }
-
-    // Draw health bars
-    if (healthBar) {
-        for (var i = 0; i < units.length; i++) {
-            units[i].drawHealth();
-        }
-    }
-
-    // Update and draw towers
-    for (let i = towers.length - 1; i >= 0; i--) {
-        
-        let t = towers[i];
-
-        // Target units and update cooldowns
-        if (!paused) {
-            t.target(units);
-            t.update();
+        // Draw health bars
+        if (healthBar) {
+            for (var i = 0; i < units.length; i++) {
+                units[i].drawHealth();
+            }
         }
 
-        // Kill if outside map
-        if (outsideMap(t)) t.kill();
+        // Update and draw towers
+        for (let i = towers.length - 1; i >= 0; i--) {
+            
+            let t = towers[i];
 
-        // Draw
-        t.draw();
+            // Target units and update cooldowns
+            if (!paused) {
+                t.target(units);
+                t.update();
+            }
 
-        if (t.isDead()) towers.splice(i, 1);
-    }
+            // Kill if outside map
+            if (outsideMap(t)) t.kill();
 
-    // Update and draw particle systems
-    for (let i = systems.length - 1; i >= 0; i--) {
-        let ps = systems[i];
-        ps.run();
-        if (ps.isDead()) systems.splice(i, 1);
-    }
+            // Draw
+            t.draw();
 
-    projectiles = projectiles.concat(newProjectiles);
-    towers = towers.concat(newTowers);
-
-    // Update and draw projectiles
-    for (let i = projectiles.length - 1; i >= 0; i--) {
-        let p = projectiles[i];
-
-        if (!paused) {
-            p.steer();
-            p.update();
+            if (t.isDead()) towers.splice(i, 1);
         }
 
-        // Attack target
-        if (p.reachedTarget()) p.explode()
+        // Update and draw particle systems
+        for (let i = systems.length - 1; i >= 0; i--) {
+            let ps = systems[i];
+            ps.run();
+            if (ps.isDead()) systems.splice(i, 1);
+        }
 
-        // Kill if outside map
-        if (outsideMap(p)) p.kill();
+        projectiles = projectiles.concat(newProjectiles);
+        towers = towers.concat(newTowers);
 
-        p.draw();
+        // Update and draw projectiles
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            let p = projectiles[i];
 
-        if (p.isDead()) projectiles.splice(i, 1);
+            if (!paused) {
+                p.steer();
+                p.update();
+            }
+
+            // Attack target
+            if (p.reachedTarget()) p.explode()
+
+            // Kill if outside map
+            if (outsideMap(p)) p.kill();
+
+            p.draw();
+
+            if (p.isDead()) projectiles.splice(i, 1);
+        }
+
+        if (selected != null && towerCenter != null) {
+            const c = center(towerCenter.x, towerCenter.y);
+            showTowerRange(selected, c.x, c.y);
+        }
+
+        //removeTempSpawns();
+
+        newProjectiles = [];
+        newTowers = [];
+
+        // If player is dead, reset game
+        if (health <= 0) startNextRound();
+
+        // Recalculate pathfinding
+        if (toPathfind) {
+            recalculate();
+            toPathfind = false;
+        }
     }
-
-    if (selected != null && towerCenter != null) {
-        const c = center(towerCenter.x, towerCenter.y);
-        showTowerRange(selected, c.x, c.y);
-    }
-
-    //removeTempSpawns();
-
-    newProjectiles = [];
-    newTowers = [];
-
-    // If player is dead, reset game
-    if (health <= 0) startNextRound();
-
-    // Recalculate pathfinding
-    if (toPathfind) {
-        recalculate();
-        toPathfind = false;
-    }
-}
 
 function mousePressed() {
     if (!mouseInMap()) return;
