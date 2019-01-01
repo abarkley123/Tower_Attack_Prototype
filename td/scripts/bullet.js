@@ -1,7 +1,7 @@
 class Bullet {
-    constructor(x, y, e) {
+    constructor(t, e) {
         // Physics
-        this.pos = createVector(x, y);
+        this.pos = createVector(t.pos.x, t.pos.y);
         this.vel = createVector(0, 0);
         this.acc = createVector(0, 0);
         // Display
@@ -15,23 +15,19 @@ class Bullet {
         this.firstTargetLocated = e;
         // Stats
         this.accAmt = 0.6;
-        this.blastRadius = 5;
-        this.damageMax = 60;
-        this.damageMin = 40;
+        this.blastRadius = 1;
+        this.damageMax = t.damageMax;
+        this.damageMin = t.damageMin;
         this.lifetime = 60;
         this.range = 7;
         this.topSpeed = (4 * 24) / ts;
         this.canSteer = false;
         this.final = createVector(0, 0);
+        this.resolveToTarget();
     }
 
     setSteer(steer) {
         this.canSteer = steer;
-    }
-
-    setVel(traj) {
-        console.log(traj);
-        this.vel = traj;
     }
 
     draw() {
@@ -57,7 +53,7 @@ class Bullet {
         for (var i = 0; i < inRadius.length; i++) {
             var e = inRadius[i];
             if (inRange(e.pos.x, e.pos.y, this.pos.x, this.pos.y)) {
-                const damage = round(random(this.damageMax, this.damageMin));
+                const damage = floor(random(this.damageMax, this.damageMin));
                 e.dealDamage(damage, 'physical');
                 break;
             }
@@ -101,17 +97,29 @@ class Bullet {
         this.acc.add(unit.mult(this.accAmt));
     }
 
-    update() {
-        this.vel.limit(this.topSpeed);
-        this.pos.add(this.vel);
-        this.acc.mult(0);
+    resolveToTarget() {
+        if (!this.target.alive) this.explode();
+        const trajectory = determineNextPoint(this);
+        this.final = trajectory;
+        const trajVector = createVector(trajectory.x, trajectory.y);
+        const vel = vec_mul(trajVector, this.topSpeed);
 
-        if (!this.target.alive || inRange(this.final.x, this.final.y, this.pos.x, this.pos.y)) this.kill();
-        if (this.lifetime > 0) {
-            this.lifetime--;
-            if (inRange(this.target.x, this.target.y, this.pos.x, this.pos.y)) {
+        this.vel.add(trajVector);
+    }
+
+    update() {
+        this.pos.add(this.vel);
+
+        if (!this.target.alive) {
+            if (this.canSteer) {
+                this.findTarget();
+            } else {
                 this.explode();
             }
+        }
+
+        if (this.lifetime > 0) {
+            this.lifetime--;
         } else {
             this.explode();
         }

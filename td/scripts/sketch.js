@@ -1,4 +1,4 @@
-var accessibleUnits = {weak:1, strong: 12.5, stronger: 50, fast: 12.5, regen: 30, medic: 40, blend: 25, faster:50, tank: 100, taunt:400, spawner:500};
+var accessibleUnits = {weak:1, strong: 12.5, stronger: 50, fast: 12.5, regen: 30, medic: 40, blend: 25, faster:50, spawner:100, tank: 100, taunt:400, hive: 1000};
 var units = [];
 var projectiles = [];
 var systems = [];
@@ -78,9 +78,27 @@ var sellConst = 0.8;    // ratio of tower cost to sell price
 var wallCover = 0.1;    // percentage of map covered by walls
 var waveCool = 120;     // number of ticks between waves
 var weakness = 0.5;     // damage increase from weakness
-
+var passiveIncome = 1;
 var sabotagedTowers = 0;
 // Misc functions
+
+var upgrades = {
+    'passive' : {
+        'current' : 0,
+        '1' : {
+            cost : 100,
+            mul : 2
+        },
+        '2' : {
+            cost : 250,
+            mul : 3
+        },
+        '3' : {
+            cost : 500,
+            mul : 4
+        }
+    }
+}
 
 // Spawn a group of units, alternating if multiple types
 function addGroup(group) {
@@ -100,22 +118,6 @@ function buy(t) {
     newTowers.push(t);
 }
 
-// Calculate and display current and average FPS
-function calcFPS() {
-    var fps = frameRate();
-    avgFPS += (fps - avgFPS) / ++numFPS;
-
-    // Draw black rect under text
-    noStroke();
-    fill(0);
-    rect(0, height - 40, 70, 40);
-
-    // Update FPS meter
-    fill(255);
-    var fpsText = 'FPS: ' + fps.toFixed(2) + '\nAvg: ' + avgFPS.toFixed(2);
-    text(fpsText, 5, height - 25);
-}
-
 // Check if all conditions for placing a tower are true
 function canPlace(col, row) {
     if (!toPlace) return false;
@@ -125,11 +127,6 @@ function canPlace(col, row) {
     if (!empty(col, row) || !placeable(col, row)) return false;
     return true;
 }
-
-// Check if spawn cooldown is done and units are available to spawn
-// function canSpawn() {
-//     return newUnits.length > 0 && ticks_till_spawn === 0;
-// }
 
 // Check if all conditions for showing a range are true
 function doRange() {
@@ -210,107 +207,27 @@ function getWalkMap() {
     return walkMap;
 }
 
-// Load a map from a map string
-// function importMap(str) {
-//     try {
-//         custom = JSON.parse(LZString.decompressFromBase64(str));
-//         document.getElementById('custom').selected = true;
-//         resetGame();
-//     } catch (err) {}
-// }
-
-// Load map from template
-// Always have an exit and spawnpoints if you do not have a premade grid
-// TODO health and money by map
 function loadMap() {
     var name = 'sparse2';
 
     health = 40;
     cash = 55;
-    
-    if (name === 'custom' && custom) {
-        // Grids
-        display = copyArray(custom.display);
-        displayDir = copyArray(custom.displayDir);
-        grid = copyArray(custom.grid);
-        metadata = copyArray(custom.metadata);
-        paths = copyArray(custom.paths);
-        // Important tiles
-        exit = createVector(custom.exit[0], custom.exit[1]);
-        spawnpoints = [];
-        for (var i = 0; i < custom.spawnpoints.length; i++) {
-            var s = custom.spawnpoints[i];
-            spawnpoints.push(createVector(s[0], s[1]));
-        }
-        // Colors
-        bg = custom.bg;
-        border = custom.border;
-        borderAlpha = custom.borderAlpha;
-        // Misc
-        cols = custom.cols;
-        rows = custom.rows;
 
-        resizeFit();
-    } else if (name in maps) {
-        var m = maps[name];
-
-        // Grids
-        display = copyArray(m.display);
-        displayDir = copyArray(m.displayDir);
-        grid = copyArray(m.grid);
-        metadata = copyArray(m.metadata);
-        paths = copyArray(m.paths);
-        // Important tiles
-        exit = createVector(m.exit[0], m.exit[1]);
-        spawnpoints = [];
-        for (var i = 0; i < m.spawnpoints.length; i++) {
-            var s = m.spawnpoints[i];
-            spawnpoints.push(createVector(s[0], s[1]));
-        }
-        // Colors
-        bg = m.bg;
-        border = m.border;
-        borderAlpha = m.borderAlpha;
-        // Misc
-        cols = m.cols;
-        rows = m.rows;
-
-        resizeFit();
-    } else {
-        resizeMax();
-        var numSpawns;
-        wallCover = 0.1;
-        if (name[name.length - 1] === '3') {
-            cash = 65;
-            numSpawns = 3;
-        } else {
-            numSpawns = 2;
-        }
-        if (name === 'empty2' || name === 'empty3') {
-            wallCover = 0;
-        }
-        if (name === 'sparse2' || name === 'sparse3') {
-            wallCover = 0.1;
-        }
-        if (name === 'dense2' || name === 'dense3') {
-            wallCover = 0.2;
-        }
-        if (name === 'solid2' || name === 'solid3') {
-            wallCover = 0.3;
-        }
-        randomMap(numSpawns);
-        display = replaceArray(
-            grid, [0, 1, 2, 3, 4], ['empty', 'wall', 'empty', 'tower', 'empty']
-        );
-        displayDir = buildArray(cols, rows, 0);
-        // Colors
-        bg = [0, 0, 0];
-        border = 255;
-        borderAlpha = 31;
-        // Misc
-        metadata = buildArray(cols, rows, null);
-     }
-
+    resizeMax();
+    var numSpawns;
+    numSpawns = 2;
+    wallCover = 0.1;
+    randomMap(numSpawns);
+    display = replaceArray(
+    grid, [0, 1, 2, 3, 4], ['empty', 'wall', 'empty', 'tower', 'empty']);
+    displayDir = buildArray(cols, rows, 0);
+    // Colors
+    bg = [205, 92, 92];
+    border = 255;
+    borderAlpha = 31;
+    // Misc
+    metadata = buildArray(cols, rows, null);
+    resizeFit();
     tempSpawns = [];
     recalculate();
 }
@@ -319,10 +236,9 @@ function createTowers(roundNum) {
     if (!(roundNum > 0)) {
         roundNum = 0;
     }
-    var tierSet = ['gun', 'laser', 'slow', 'rotator', 'sniper', 'rocket', 'bomb', 'tesla'];
-    let maximumTowers = 10;
+    var tierSet = ['gun', 'shooter', 'laser', 'slow', 'sniper', 'rocket', 'bomb', 'tesla'];
     let maximumTier = 1;
-    maximumTowers = 5 + (3*(roundNum+1));
+    maximumTowers = (cols * rows)/120 + (2*(roundNum+1));
     maximumTier = floor(++roundNum/2);
     if (maximumTier > 8) {
         maximumTier = 8;
@@ -333,7 +249,7 @@ function createTowers(roundNum) {
     let i = 0;
     let numUpgraded = 0;
     while (i < maximumTowers) {
-        var randomTier = Math.floor(Math.random() * (maximumTier - 1 + 1)) + 1;
+        var randomTier = floor(random() * (maximumTier - 1 + 1)) + 1;
         toPlace = true;
         godMode = true;
         const x = randint(cols);
@@ -596,18 +512,30 @@ function startNextRound() {
 // Changes tile size to fit everything onscreen
 function resizeFit() {
     var div = document.getElementById('sketch-holder');
-    var ts1 = floor(div.offsetWidth / cols);
-    var ts2 = floor(div.offsetHeight / rows);
+    var ts1 = floor(div.offsetWidth / 35);
+    var ts2 = floor(div.offsetHeight / 35);
     ts = Math.min(ts1, ts2);
     resizeCanvas(cols * ts, rows * ts, true);
+    document.getElementById('defaultCanvas0').style.width = '100%';
+    document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
-// Resizes cols, rows, and canvas based on tile size
+// Resizes cols, rows, and canvas ased on tile size
 function resizeMax() {
     var div = document.getElementById('sketch-holder');
     cols = floor(div.offsetWidth / ts);
     rows = floor(div.offsetHeight / ts);
+    while (cols * ts < div.offsetWidth) {
+        cols++;
+    }
+
+    while (rows * ts < div.offsetHeight) {
+        rows++;
+    }    
+
     resizeCanvas(cols * ts, rows * ts, true);
+    document.getElementById('defaultCanvas0').style.width = '100%';
+    document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
 // Sell a tower
@@ -673,6 +601,9 @@ function updateStatus() {
     document.getElementById('wave').innerHTML = 'Wave ' + wave;
     document.getElementById('health').innerHTML = 'Health: ' +
     health + '/' + maxHealth;
+    if (!paused) {
+        cash += passiveIncome/frameRate();
+    }
     document.getElementById('cash').innerHTML = '$' + floor(cash);
 }
 
@@ -708,7 +639,6 @@ function preload() {
 
     function setup() {
         var div = document.getElementById('sketch-holder');
-        console.log(div.offsetWidth);
         var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
         canvas.parent('sketch-holder');
         resetGame();
@@ -729,9 +659,9 @@ function preload() {
         }
 
         // Draw basic tiles
-        noStroke();
-        fill(205, 92, 92);
-        rect(0, 0, cols * ts, rows * ts);
+        // noStroke();
+        // fill(205, 92, 92);
+        // rect(0, 0, cols * ts, rows * ts);
 
      
             let counter = 1;
@@ -935,6 +865,58 @@ function getUnitNameAsUnit() {
 
 function addToSpawn(value) {
     addGroup([value, 1]);
+}
+
+$('.Upgrade').on('click', function(event) {
+    processUpgrade($(this).attr('id'));
+});
+
+function processUpgrade(id) {
+    if (id !== null || id !== undefined) {
+        try {
+            const upg = upgrades[id];
+            let curr = upg.current + 1;
+            const currentUpg = upg[curr.toString()];
+            if (upg.current <= 3 && transact(currentUpg.cost)) {
+                const elementToImprove = resolveForUpgrade(id, currentUpg.mul);
+                upg.current++;
+
+                //TODO - refactor into own method for extensibility
+                let displayString = [elementToImprove, 'N/A', 'N/A'];
+                if (upg.current < 3) {
+                    const nextUpg = upg[(++curr).toString()];
+                    displayString[1] = nextUpg.cost;
+                    displayString[2] = nextUpg.mul;
+                } else if (upg.current == 4) {
+                    displayString[0] += '(max)';
+                }
+
+                document.getElementById(id + '_1').innerHTML = displayString[0];
+                document.getElementById(id + '_2').innerHTML = displayString[1];
+                document.getElementById(id + '_3').innerHTML = displayString[2];
+            } else {
+                console.log('Insufficient funds to purchase.');
+                //todo - remove button if not allowable, avoid try-catch swallowing exception
+            }
+        } catch (NoSuchUpgradeException) {
+            console.log("Couldn't find upgrade for " + id);
+        }
+    }
+}
+
+function transact(amount) {
+    if (amount <= cash) {
+        cash -= amount;
+        return true;
+    }
+
+    return false;
+}
+
+function resolveForUpgrade(id, mul) {
+    switch (id) {
+        case 'passive' : passiveIncome *= mul; return passiveIncome;
+    }
 }
 
 $('.Unit').on('click', function(event) {

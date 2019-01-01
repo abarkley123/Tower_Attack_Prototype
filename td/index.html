@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
     <title>Tower Attack</title>
     <link href="css/style.css" rel="stylesheet">
     <script src="scripts/jquery.min.js"></script>
@@ -31,7 +32,7 @@
     <main>
       <div id="left-asides">
         <aside id="store">
-          <h2>Shop</h2><br>
+          <h2>Units</h2><br>
           <div class="group">
             <p><button class="Unit" id="weak">Weak Unit</button></p>
             <p><button class="Unit" id="strong">Strong Unit</button></p>
@@ -39,13 +40,24 @@
             <p><button class="Unit" id='blend'>Blend Unit</button></p>
             <p><button class="Unit" id="stronger">Stronger Unit</button></p>
             <p><button class="Unit" id='faster'>Faster Unit</button></p>
+            <p><button class="Unit" id='spawner'>Spawner Unit</button></p>
             <p><button class="Unit" id='tank'>Tank Unit</button></p>
             <p><button class="Unit" id='medic'>Medic Unit</button></p>
             <p><button class="Unit" id='regen'>Regen Unit</button></p>
             <p><button class="Unit" id='taunt'>Aggro Unit</button></p>
-            <p><button class="Unit" id='spawner'>Spawner Unit</button></p>
+            <p><button class="Unit" id='hive'>Hive Unit</button></p>
           </div>
         </aside>
+
+         <aside id="store">
+          <h2>Upgrades</h2><br>
+          <div class="group">
+            <p style='text-align:center;'><button class="Upgrade" id="passive">Passive income<br></button>
+              <span>Currently <strong id='passive_1'>1</strong> p/s</span><br>
+              <span>Costs <strong id="passive_2">100</strong> to increase <strong id="passive_3">2x</strong></span></p>
+          </div>
+        </aside>
+
       </div>
 
       <div id="sketch-holder"></div>

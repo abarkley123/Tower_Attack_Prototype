@@ -153,53 +153,34 @@ button {
 }
 
 
-/* Misc. buttons */
-
 .io {
     background-color: rgb(224, 130, 131);
 }
 
-/*#sell {
-    background-color:#D3D3D3;;
- background-color: rgb(248, 148, 6); 
-}*/
 
 #upgrade {
     background-color: rgb(25, 181, 254);
 }
 
 
-/* Tower types */
-
-/*#weak {
-    background-color: rgb(249, 191, 59);
-}
-
-#strong {
-    background-color: rgb(25, 181, 254);
-}
-
-#stronger {
-    background-color: rgb(68, 108, 179);
-}
-
-#strongFast {
-    background-color: rgb(207, 0, 15);
-}
-
-#tank {
-    background-color: rgb(30, 130, 76);
-}
-
-#fast {
-    background-color: rgb(102, 51, 153);
-}
-
-#faster {
-    background-color: rgb(255, 255, 0);
-}*/
-
 .Unit {
+    margin: 5%;
+    background-color: #5D001E;
+    color: #E3E2DF;
+    border: none;
+    border-radius: 8px;
+}
+
+@media only screen and (max-height: 1000px) {
+  .Unit {
+    margin: 1px;
+  }
+  p {
+    margin: 0px;
+  }
+} 
+
+.Upgrade {
     margin: 5%;
     background-color: #5D001E;
     color: #E3E2DF;

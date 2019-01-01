@@ -20,8 +20,8 @@ tower.gun = {
     name: 'gun',
     title: 'Gun Tower',
     // Stats
-    cooldownMax: 50,
-    cooldownMin: 30,
+    cooldownMax: 40,
+    cooldownMin: 25,
     cost: 25,
     range: 3,
     allowsSteer: false,
@@ -34,11 +34,11 @@ tower.gun = {
             name: 'machineGun',
             title: 'Machine Gun',
             // Stats
-            cooldownMax: 17,
-            cooldownMin: 7,
+            cooldownMax: 15,
+            cooldownMin: 10,
             cost: 75,
-            damageMax: 10,
-            damageMin: 0,
+            damageMax: 12.5,
+            damageMin: 5,
             allowsSteer: true
         }
     ],
@@ -60,18 +60,66 @@ tower.gun = {
     onAim: function(e) {
         if (stopFiring) return;
         if (!this.canFire()) return;
-        let bullet = new Bullet(this.pos.x, this.pos.y, e);
-        //if (bullet.allowsSteer)
-        bullet.setSteer(true);
+        let bullet = new Bullet(this, e);
+        if (this.allowsSteer) bullet.setSteer(true);
         if (this.canFire() || this.follow) {
             //we need to predict where to shoot, not 100% accurate so gives interesting effect
-            this.aim(e.pos.x, e.pos.y);
+            this.aim(this.pos.x + bullet.final.x, this.pos.y + bullet.final.y);
         }
         this.resetCooldown();
         projectiles.push(bullet);
     },
 };
 
+tower.shooter = {
+    // Display
+    color: [16, 64, 192],
+    attackColor: [74, 35, 90],
+    length: 0.6,
+    radius: 0.8,
+    secondary: [149, 165, 166],
+    width: 0.25,
+    weight:4,
+    // Misc
+    name: 'shooter',
+    title: 'Beam shooter',
+    // Stats
+    cooldownMax: 25,
+    cooldownMin: 15,
+    cost: 75,
+    damageMax: 15,
+    damageMin: 2.5,
+    range: 3,
+    type: 'energy',
+    // Methods
+    drawBarrel: function() {
+        stroke(this.border);
+        fill(this.secondary);
+        var back = -this.length * ts / 2;
+        var side = this.width * ts / 2;
+        rect(back + ts/2, -side, this.length * ts, this.width * ts);
+    },
+    // Upgrades
+    upgrades: [
+        {
+            // Display
+            color: [19, 105, 100],
+            attackColor: [229, 148, 0],
+            radius: 1,
+            length: 1,
+            // Misc
+            name: 'machineShooter',
+            title: 'Machine Laser',
+            // Stats
+            cooldownMax: 15,
+            cooldownMin: 5,
+            cost: 75,
+            damageMax: 15,
+            damageMin: 5,
+            range: 3.5,
+        }
+    ]
+};
 tower.laser = {
     // Display
     color: [74, 35, 90],
@@ -94,8 +142,8 @@ tower.laser = {
         {
             // Display
             color: [78, 205, 196],
-            length: 0.65,
-            radius: 0.9,
+            length: 0.85,
+            radius: 0.95,
             secondary: [191, 191, 191],
             weight: 3,
             width: 0.35,
@@ -125,9 +173,8 @@ tower.laser = {
             drawBarrel: function() {
                 stroke(this.border);
                 fill(this.secondary);
-                rect(0, -this.width * ts / 2, this.length * ts, this.width * ts);
-                //fill([23,32,42]);
-                ellipse( this.length * ts, this.width * ts, this.radius/2 * ts, this.radius/2 * ts);
+                rect(0, -this.width * ts / 2 * 0.67, this.length * ts, this.width * ts * 0.67);
+                ellipse(this.width * ts, this.width * ts - 0.33 * ts, this.radius/2 * ts, this.radius/2 * ts);
             }
         }
     ]
@@ -210,60 +257,6 @@ tower.slow = {
     ]
 };
 
-tower.rotator = {
-    // Display
-    baseOnTop: false,
-    color: [150, 35, 90],
-    attackColor: [74, 35, 90],
-    length: 0.8,
-    radius: 0.8,
-    secondary: [149, 165, 166],
-    width: 0.25,
-    weight:6,
-    // Misc
-    name: 'rotator',
-    title: 'Rotator Tower',
-    // Stats
-    cooldownMax: 1,
-    cost: 75,
-    damageMax: 3,
-    range: 2,
-    type: 'energy',
-    // Methods
-    drawBarrel: function() {
-        stroke(this.border);
-        fill(this.secondary);
-        var back = -this.length * ts / 2;
-        var side = this.width * ts / 2;
-        rect(back, -side, this.length * ts, this.width * ts);
-    },
-    update() {
-        this.angle -= PI / 60;
-        if (this.cd > 0) this.cd--;
-    },
-    // Upgrades
-    upgrades: [
-        {
-            // Display
-            color: [102, 204, 26],
-            radius: 0.9,
-            // Misc
-            name: 'poison',
-            title: 'Poison Tower',
-            // Stats
-            cooldownMax: 60,
-            cooldownMin: 60,
-            cost: 150,
-            range: 2,
-            type: 'poison',
-            // Methods
-            onHit: function(e) {
-                e.applyEffect('poison', 60);
-            }
-        }
-    ]
-};
-
 tower.sniper = {
     // Display
     color: [207, 0, 15],
@@ -297,9 +290,9 @@ tower.sniper = {
         if (stopFiring) return;
         entities = this.visible(entities);
         if (entities.length === 0) return;
-        var t = getTaunting(entities);
+        const t = getTaunting(entities);
         if (t.length > 0) entities = t;
-        var e = getStrongest(entities);
+        const e = getStrongest(entities);
         if (typeof e === 'undefined') return;
         this.onAim(e);
     },

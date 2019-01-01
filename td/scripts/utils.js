@@ -12,7 +12,6 @@ function determineNextPoint(p) {
     // adjust for target position based on the amount of "time units" to travel "dist"
     // and the targets speed vector
     enemyVec = vec_add(enemyVec, vec_mul(target.vel, dist/bulletSpeed));
-    p.final = enemyVec;
     // calculate trajectory of bullet
     var bulletTrajectory = vec_mul(vec_normal(enemyVec), bulletSpeed);
     // assign values
@@ -335,4 +334,35 @@ function inRange(x1, y1, x2, y2) {
         }
     }
     return false;
+}
+
+function resolveSpawnerDamage(wave) {
+    let damage = ++wave * getDamageOf('weak');
+    if (wave >= 4) {
+        let numToSpawn = wave - 3;
+        damage += numToSpawn * (getDamageOf('fast') + getDamageOf('strong'));
+        if (wave >= 7) {
+            numToSpawn = wave - 6;
+            damage += numToSpawn * (getDamageOf('blend') + getDamageOf('regen'));
+        }
+
+        if (wave >= 10) {
+            numToSpawn = wave - 9;
+            damage += numToSpawn * (getDamageOf('faster') + getDamageOf('stronger'));
+        }
+    } 
+
+    return damage/2;
+}
+
+function getDamageOf(unit) {
+    switch (unit) {
+        case 'weak' : return 1;
+        case 'strong' : return 2;
+        case 'fast' : return 2;
+        case 'blend' : return 3;
+        case 'regen' : return 3;
+        case 'faster' : return 4;
+        case 'stronger' : return 4;
+    }
 }

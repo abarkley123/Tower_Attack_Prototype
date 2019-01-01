@@ -22,7 +22,7 @@ unit.weak = {
     name: 'weak',
     // Stats
     cash: 1,
-    health: 35,
+    health: 10,
 };
 
 unit.strong = {
@@ -168,6 +168,59 @@ unit.faster = {
     damage: 4
 };
 
+unit.spawner = {
+    // Display
+    color: [244, 232, 66],
+    radius: 0.7,
+    // Misc
+    name: 'spawner',
+    // Stats
+    cash: 100,
+    health: 100,
+    immune: ['slow'],
+    weak: ['explosion', 'piercing', 'energy', 'physical'],
+    // Methods
+    onKilled: function() {
+        if (this.alive) {
+            this.kill();
+            if (!muteSounds && sounds.hasOwnProperty(this.sound)) {
+                sounds[this.sound].play();
+            }
+            
+            // Add new temporary spawnpoint
+            var c = gridPos(this.pos.x, this.pos.y);
+            if (c.equals(exit)) return;
+            for (var i = 0; i < tempSpawns.length; i++) {
+                if (c.equals(tempSpawns[i][0])) return;
+            }
+            tempSpawns.push([createVector(c.x, c.y), wave]);
+            for (let i=0; i < wave; i++) {
+                let damageToAdd = 0;
+                newUnits.push('weak');
+                //add half unit individual damage
+                if (i >= 4) {
+                    newUnits.push('strong');
+                    newUnits.push('fast');
+                }
+
+                if (i >= 7) {
+                    newUnits.push('blend');
+                    newUnits.push('regen');
+                }
+
+                if (i >= 10) {
+                    newUnits.push('stronger');
+                    newUnits.push('faster');
+                }
+            }
+        }
+    },
+    onCreate : function() {
+        this.damage = resolveSpawnerDamage(wave);
+        this.maxHealth = this.health;
+    }
+};
+
 unit.tank = {
     // Display
     color: [30, 130, 76],
@@ -235,19 +288,20 @@ unit.taunt = {
     }
 };
 
-unit.spawner = {
+unit.hive = {
     // Display
-    color: [244, 232, 66],
-    radius: 0.7,
+    color: [208, 184, 40],
+    radius: 0.9,
     // Misc
-    name: 'spawner',
+    name: 'hive',
     // Stats
-    cash: 500,
-    health: 1150,
+    cash: 1000,
+    health: 1000,
+    immune: ['poison', 'slow'],
+    resistant: ['energy', 'physical'],
     // Methods
     onKilled: function() {
         if (this.alive) {
-            cash += this.cash;
             this.kill();
             if (!muteSounds && sounds.hasOwnProperty(this.sound)) {
                 sounds[this.sound].play();
@@ -260,17 +314,45 @@ unit.spawner = {
                 if (c.equals(tempSpawns[i][0])) return;
             }
             tempSpawns.push([createVector(c.x, c.y), wave]);
-            console.log(tempSpawns);
-            for (let i=0; i < wave; i++) {
+            for (let i=0; i < 10; i++) {
+                let damageToAdd = 0;
                 newUnits.push('weak');
-                if (i > 4) {
+                newUnits.push('weak');
+                //add half unit individual damage
+                if (i % 2 == 0) {
                     newUnits.push('strong');
-                }
-
-                if (i > 6) {
                     newUnits.push('fast');
+                    newUnits.push('stronger');
+                    newUnits.push('faster');
+                } else if (i % 5 == 0) {
+                    newUnits.push('spawner');
                 }
             }
         }
+    },
+    damage: 100,
+    draw: function() {
+        push();
+        translate(this.pos.x, this.pos.y);
+        rotate(this.vel.heading());
+        
+        stroke(0);
+        fill(this.getColor());
+        var front = this.radius * ts / 2;
+        var side = 0.7 * ts / 2;
+        var barrel = 0.15 * ts / 2;
+        var length = 0.7 * ts;
+        var curve = 0.5 * ts;
+        //rect(-front, -side, front * 3, side * 3, curve);
+        fill(144, 127, 28);
+
+        ellipse(0, 0, 0.2 * ts * 4, 0.2 * ts * 4);
+        ellipse(2, 2, 0.35 * ts, 0.35 * ts);
+        ellipse(-2, -2, 0.35 * ts, 0.35 * ts);
+        fill(211, 204, 49);
+        ellipse(6, 6, 0.2 * ts * 4, 0.2 * ts * 4);
+        ellipse(8, 8, 0.35 * ts, 0.35 * ts);
+        ellipse(4, 4, 0.35 * ts, 0.35 * ts);
+        pop();
     }
-};
+}
