@@ -27,14 +27,14 @@ var grid;               // tile type
                         // (0 = empty, 1 = wall, 2 = path, 3 = tower,
                         //  4 = unit-only pathing)
 var metadata;           // tile metadata
-var paths;              // direction to reach exit
+var paths = [];         // direction to reach exit via waypoints.
 var visitMap;           // whether exit can be reached
 var walkMap;            // walkability map
 
 var exit;
 var spawnpoints = [];
 var tempSpawns = [];
-
+var waypoints = [];
 var cash;
 var health;
 var maxHealth;
@@ -120,11 +120,15 @@ function buy(t) {
 
 // Check if all conditions for placing a tower are true
 function canPlace(col, row) {
-    var g = grid[col][row];
-    if (!empty(col, row) || !placeable(col, row)) return false;
-    if (g === 3) return true;
-    if (g === 1 || g === 2 || g === 4) return false;
-    return true;
+    try {
+        var g = grid[col][row];
+        if (!empty(col, row) || !placeable(col, row)) return false;
+        if (g === 3) return true;
+        if (g === 1 || g === 2 || g === 4) return false;
+        return true;
+    } catch (NoSuchTileException) {
+        return false;
+    }
 }
 
 // Check if tile is empty
@@ -146,6 +150,17 @@ function empty(col, row) {
     return true;
 }
 
+// Return whether tile is walkable
+function walkable(col, row) {
+    // Check if wall or tower-only tile
+    if (grid[col][row] === 1 || grid[col][row] === 3) return false;
+    // Check if tower
+    //console.log(towers);
+    if (getTower(col, row)) return false;
+    return true;
+}
+
+
 // Get an empty tile
 function getEmpty() {
     while (true) {
@@ -156,7 +171,7 @@ function getEmpty() {
 
 // Find tower at specific tile, otherwise return null
 function getTower(col, row) {
-    console.log(newTowers + '  ' + ' old ' + towers);
+    //console.log(newTowers + '  ' + ' old ' + towers);
     for (var i = 0; i < towers.length; i++) {
         var t = towers[i];
         if (t.gridPos.x === col && t.gridPos.y === row) return t;
@@ -203,21 +218,19 @@ function getWalkMap() {
 }
 
 function loadMap() {
-    var name = 'sparse2';
+    var name = 'empty';
 
     health = 40;
-    cash = 55;
+    cash = 10;
 
     resizeMax();
-    var numSpawns;
-    numSpawns = 2;
-    wallCover = 0.1;
+    wallCover = 0;
     randomMap(numSpawns);
     display = replaceArray(
     grid, [0, 1, 2, 3, 4], ['empty', 'wall', 'empty', 'tower', 'empty']);
     displayDir = buildArray(cols, rows, 0);
     // Colors
-    bg = [205, 92, 92];
+    bg = loadImage("images/map.png");
     border = 255;
     borderAlpha = 31;
     // Misc
@@ -244,6 +257,7 @@ function createTowers(roundNum) {
     let i = 0;
     let numUpgraded = 0;
     let numAtExit = 0;
+    let exitPositions = [];
     while (i < maximumTowers) {
         var randomTier = floor(random() * (maximumTier - 1 + 1)) + 1;
         toPlace = true;
@@ -251,11 +265,11 @@ function createTowers(roundNum) {
         let x = randint(cols);
         let y = randint(rows);
         const arr = withinArea(exit.x, exit.y, 2);
-        console.log(arr);
-        if (arr !== null && numAtExit < 5) {
+        if (arr !== null && numAtExit < 5 && !isArrayInArray(exitPositions, arr)) {
             x = arr[0];
             y = arr[1];
             numAtExit++;
+            exitPositions.push(arr);
         }
 
         if (canPlace(x, y)) {
@@ -275,6 +289,22 @@ function createTowers(roundNum) {
     } 
     godMode = false;
     toPlace = false;  
+}
+
+function placeTowerAt(x, y) {
+    if (canPlace(x, y)) {
+        let t = createTower(x, y, tower[tierSet[randomTier-1]]);
+        buy(t);
+        if (numUpgraded < maximumTowers/3) {
+            if (canUpgrade(roundNum, maximumTier, randomTier) && t.upgrades.length > 0) {
+                upgrade(t.upgrades[0]);
+                numUpgraded++;
+            }
+        }
+        return t;
+        //i++;
+    }
+    return null;
 }
 
 function withinArea(x, y, r) {
@@ -346,11 +376,6 @@ function placeable(col, row) {
     walkMap[col][row] = false;
     var visitMap = getVisitMap(walkMap);
 
-    // Check spawnpoints
-    for (var i = 0; i < spawnpoints.length; i++) {
-        if (!visitMap[vts(spawnpoints[i])]) return false;
-    }
-
     // Check each unit
     for (var i = 0; i < units.length; i++) {
         var e = units[i];
@@ -378,7 +403,7 @@ function randomMap(numSpawns) {
 }
 
 function generateExit(walkMap) {
-    exit = getEmpty();
+    exit = createVector(0, rows / 1.58);
     var adj = neighbors(walkMap, exit.x, exit.y, false);
     for (var i = 0; i < adj.length; i++) {
         var n = stv(adj[i]);
@@ -388,20 +413,11 @@ function generateExit(walkMap) {
 
 function generateSpawns(walkMap) {
     spawnpoints = [];
-    visitMap = getVisitMap(walkMap);
-    for (var i = 0; i < numSpawns; i++) {
-        var s;
-        // Try to place spawnpoint
-        for (var j = 0; j < 100; j++) {
-            s = getEmpty();
-            while (!visitMap[vts(s)]) s = getEmpty();
-            if (s.dist(exit) >= minDist) break;
-        }
-        spawnpoints.push(s);
-    }
+    let s = createVector(floor(cols/8.5), 0);
+    spawnpoints.push(s);
 }
 
-// Random grid coordinate
+// Random grid coordina/te
 function randomTile() {
     return createVector(randint(cols), randint(rows));
 }
@@ -409,64 +425,72 @@ function randomTile() {
 // Recalculate pathfinding maps
 // Algorithm from https://www.redblobgames.com/pathfinding/tower-defense/
 function recalculate() {
+    determineWaypoints();
     walkMap = getWalkMap();
-    var frontier = [];
-    var target = vts(exit);
-    frontier.push(target);
-    var cameFrom = {};
-    var distance = {};
-    cameFrom[target] = null;
-    distance[target] = 0;
+    for (let num = 0; num < 8; num++) {
+        var frontier = [];
+        var target = vts(waypoints[num]);
+        frontier.push(target);
+        var cameFrom = {};
+        var distance = {};
+        cameFrom[target] = null;
+        distance[target] = 0;
 
-    // Fill cameFrom and distance for every tile
-    while (frontier.length !== 0) {
-        var current = frontier.shift();
-        var t = stv(current);
-        var adj = neighbors(walkMap, t.x, t.y, true);
+        // Fill cameFrom and distance for every tile
+        while (frontier.length !== 0) {
+            var current = frontier.shift();
+            var t = stv(current);
+            var adj = neighbors(walkMap, t.x, t.y, true);
 
-        for (var i = 0; i < adj.length; i++) {
-            var next = adj[i];
-            if (!(next in cameFrom) || !(next in distance)) {
-                frontier.push(next);
-                cameFrom[next] = current;
-                distance[next] = distance[current] + 1;
+            for (var i = 0; i < adj.length; i++) {
+                var next = adj[i];
+                if (!(next in cameFrom) || !(next in distance)) {
+                    frontier.push(next);
+                    cameFrom[next] = current;
+                    distance[next] = distance[current] + 1;
+                }
             }
         }
-    }
 
-    // Generate usable maps
-    dists = buildArray(cols, rows, null);
-    var newPaths = buildArray(cols, rows, 0);
-    var keys = Object.keys(cameFrom);
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var current = stv(key);
+        // // Generate usable maps
+         dists = buildArray(cols, rows, null);
+        var newPaths = buildArray(cols, rows, 0);
+        //console.log(newPaths);
+        var keys = Object.keys(cameFrom);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var current = stv(key);
 
-        // Distance map
-        dists[current.x][current.y] = distance[key];
+            // Distance map
+            dists[current.x][current.y] = distance[key];
 
-        // Generate path direction for every tile
-        var val = cameFrom[key];
-        if (val !== null) {
-            // Subtract vectors to determine direction
-            var next = stv(val);
-            var dir = next.sub(current);
-            // Fill tile with direction
-            if (dir.x < 0) newPaths[current.x][current.y] = 1;
-            if (dir.y < 0) newPaths[current.x][current.y] = 2;
-            if (dir.x > 0) newPaths[current.x][current.y] = 3;
-            if (dir.y > 0) newPaths[current.x][current.y] = 4;
+            // Generate path direction for every tile
+            var val = cameFrom[key];
+            if (val !== null) {
+                // Subtract vectors to determine direction
+                var next = stv(val);
+                var dir = next.sub(current);
+                // Fill tile with direction
+                if (dir.x < 0) newPaths[current.x][current.y] = 1;
+                if (dir.y < 0) newPaths[current.x][current.y] = 2;
+                if (dir.x > 0) newPaths[current.x][current.y] = 3;
+                if (dir.y > 0) newPaths[current.x][current.y] = 4;
+            }
         }
+        paths.push(newPaths);
     }
+}
 
-    // Preserve old paths on path tiles
-    for (var x = 0; x < cols; x++) {
-        for (var y = 0; y < rows; y++) {
-            if (grid[x][y] === 2) newPaths[x][y] = paths[x][y];
-        }
-    }
-
-    paths = newPaths;
+function determineWaypoints() {
+    waypoints = [];
+    waypoints.push(createVector(floor(cols/8.5), rows/2.7));
+    waypoints.push(createVector(cols/2.18, rows/2.7));
+    waypoints.push(createVector(cols/2.18, rows/11));
+    waypoints.push(createVector(cols/1.2, rows/11));
+    waypoints.push(createVector(cols/1.2, rows/1.11));
+    waypoints.push(createVector(cols/2.18, rows/1.11));
+    waypoints.push(createVector(cols/2.18, rows/1.58));
+    waypoints.push(createVector(0, rows / 1.55));
 }
 
 function resetGame() {
@@ -495,11 +519,20 @@ function resetGame() {
     recalculate();
 }
 
+window.onresize = function(event) {
+    var div = document.getElementById('sketch-holder');
+    document.getElementById('defaultCanvas0').remove();
+    let canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    canvas.parent('sketch-holder');
+    resizeMax();
+    resizeFit();
+};
+
 //Forces tile-size to acceptable value, scales canvas accordingly.
 function resizeFit() {
     var div = document.getElementById('sketch-holder');
-    var ts1 = floor(div.offsetWidth / 35);
-    var ts2 = floor(div.offsetHeight / 35);
+    var ts1 = floor(div.offsetWidth / cols);
+    var ts2 = floor(div.offsetHeight / rows);
     ts = Math.min(ts1, ts2);
     resizeCanvas(cols * ts, rows * ts, true);
     document.getElementById('defaultCanvas0').style.width = '100%';
@@ -509,17 +542,8 @@ function resizeFit() {
 //Determines number of cols, rows based on viewport sizes, scales canvas accordingly.
 function resizeMax() {
     var div = document.getElementById('sketch-holder');
-    cols = floor(div.offsetWidth / ts);
-    rows = floor(div.offsetHeight / ts);
-    while (cols * ts < div.offsetWidth) {
-        cols++;
-    }
-
-    while (rows * ts < div.offsetHeight) {
-        rows++;
-    }    
-
-    resizeCanvas(cols * ts, rows * ts, true);
+    cols = 48;
+    rows = 30;
     document.getElementById('defaultCanvas0').style.width = '100%';
     document.getElementById('defaultCanvas0').style.height = '100%';
 }
@@ -594,22 +618,10 @@ function updateStatus() {
 
 // Upgrade tower
 function upgrade(t) {
-    console.log('upgrading tower.');
     selected.upgrade(t);
     selected.upgrades = t.upgrades ? t.upgrades : [];
     showTowerInfo(selected);
 }
-
-// Return whether tile is walkable
-function walkable(col, row) {
-    // Check if wall or tower-only tile
-    if (grid[col][row] === 1 || grid[col][row] === 3) return false;
-    // Check if tower
-    if (getTower(col, row)) return false;
-    return true;
-}
-
-
 // Main p5 functions
 
 function preload() {
@@ -622,13 +634,13 @@ function preload() {
 }
 
 
-    function setup() {
-        var div = document.getElementById('sketch-holder');
-        var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
-        canvas.parent('sketch-holder');
-        resizeFit();
-        resetGame();
-    }
+function setup() {
+    var div = document.getElementById('sketch-holder');
+    var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    canvas.parent('sketch-holder');
+    resizeFit();
+    resetGame();
+}
 
 //Draw function for all game objects. 
 //TODO - make this more performant.
@@ -639,41 +651,6 @@ function draw() {
     // Update game status
     updatePause();
     updateStatus();
-
-    let counter = 1;
-    for (var x = 0; x < cols; x++) {
-        for (var y = 0; y < rows; y++) {
-            var t = tiles[display[x][y]];
-            if (typeof t === 'function') {
-                t(x, y, displayDir[x][y]);
-            } else {
-                if (t) {
-                    fill(51, 0, 0);
-                    if (++counter % 2 !== 0 | x > y | y > x) {
-                         rect(x * ts, y * ts, ts, ts);
-                    }
-                } 
-            }
-        }
-    }
-
-        // Draw spawnpoints
-        for (var i = 0; i < spawnpoints.length; i++) {
-            stroke(255);
-            var s = spawnpoints[i];
-            fill(154, 125, 10);
-            rect(s.x * ts, s.y * ts, ts, ts);
-            fill(241, 196, 15);
-            ellipse(s.x * ts + 0.5 * ts, s.y * ts + 0.5 * ts, ts, ts);
-            fill(207, 0, 15);
-            stroke(207, 0, 15);
-            line(s.x * ts, s.y * ts, s.x * ts + ts, s.y * ts + ts);
-        }
-
-        // Draw exit
-        stroke(255);
-        fill(20, 90, 50);
-        ellipse(exit.x * ts + 0.5 * ts, exit.y * ts + 0.5 * ts, ts, ts);
 
         // Spawn units
         if (newUnits.length > 0 && !paused) {
@@ -711,11 +688,26 @@ function draw() {
                 e.onTick();
             }
 
-            // Kill if outside map
-            if (outsideMap(e)) e.kill();
-
             // If at exit tile, kill and reduce player health
-            if (atTileCenter(e.pos.x, e.pos.y, exit.x, exit.y)) e.onExit();
+            const currentPath = waypoints[e.current];
+            try {
+                if (inRange(e.pos.x, e.pos.y, currentPath.x * ts, currentPath.y * ts)) {
+                    if (e.current === (waypoints.length-1)) {
+                        e.onExit();
+                    } else if (e.current < 7) {
+                        e.current++;
+                    }
+                }
+            } catch (NoSuchElementException) {
+                console.log("Element already killed." + NoSuchElementException);
+            }
+
+
+            // Kill if outside map
+            if (outsideMap(e)) {
+                    e.kill();
+                    break;
+            }
 
             // Draw
             e.draw();

@@ -23,6 +23,7 @@ class Unit {
         this.weak = [];             // increased damage from these damage types
         this.speed = 1;             // 4 is the max
         this.taunt = false;         // force towers to target
+        this.current = 0;
     }
 
     // Apply new status effect
@@ -123,7 +124,8 @@ class Unit {
     steer() {
         var t = gridPos(this.pos.x, this.pos.y);
         if (outsideRect(t.x, t.y, 0, 0, cols, rows)) return;
-        var dir = paths[t.x][t.y];
+        const currentPath = paths[this.current];
+        var dir = currentPath[t.x][t.y];
         if (atTileCenter(this.pos.x, this.pos.y, t.x, t.y)) {
             if (dir === null) return;
             // Adjust velocity

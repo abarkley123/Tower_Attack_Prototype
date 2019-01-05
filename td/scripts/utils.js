@@ -83,12 +83,22 @@ function buildArray(cols, rows, val) {
     return arr;
 }
 
+function isArrayInArray(arr, item){
+  var item_as_string = JSON.stringify(item);
+
+  var contains = arr.some(function(ele){
+    return JSON.stringify(ele) === item_as_string;
+  });
+  return contains;
+}
+
+
 // Return position at center of tile
 function center(col, row) {
     return createVector(col*ts + ts/2, row*ts + ts/2);
 }
 
-// Copy 2d arrayf
+// Copy 2d array
 function copyArray(arr) {
     var newArr = [];
     for (var x = 0; x < arr.length; x++) {
@@ -294,7 +304,7 @@ function rangeText(min, max) {
 // Remove empty temporary spawnpoints
 function removeTempSpawns() {
     for (var i = tempSpawns.length - 1; i >= 0; i--) {
-        tempSpawns.splice(i, 1);
+        if (tempSpawns[i][1] === 0) tempSpawns.splice(i, 1);
     }
 }
 
