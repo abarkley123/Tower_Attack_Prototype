@@ -120,17 +120,11 @@ function buy(t) {
 
 // Check if all conditions for placing a tower are true
 function canPlace(col, row) {
-    if (!toPlace) return false;
     var g = grid[col][row];
+    if (!empty(col, row) || !placeable(col, row)) return false;
     if (g === 3) return true;
     if (g === 1 || g === 2 || g === 4) return false;
-    if (!empty(col, row) || !placeable(col, row)) return false;
     return true;
-}
-
-// Check if all conditions for showing a range are true
-function doRange() {
-    return mouseInMap() && toPlace && typeof towerType !== 'undefined';
 }
 
 // Check if tile is empty
@@ -162,6 +156,7 @@ function getEmpty() {
 
 // Find tower at specific tile, otherwise return null
 function getTower(col, row) {
+    console.log(newTowers + '  ' + ' old ' + towers);
     for (var i = 0; i < towers.length; i++) {
         var t = towers[i];
         if (t.gridPos.x === col && t.gridPos.y === row) return t;
@@ -248,12 +243,21 @@ function createTowers(roundNum) {
 
     let i = 0;
     let numUpgraded = 0;
+    let numAtExit = 0;
     while (i < maximumTowers) {
         var randomTier = floor(random() * (maximumTier - 1 + 1)) + 1;
         toPlace = true;
         godMode = true;
-        const x = randint(cols);
-        const y = randint(rows);
+        let x = randint(cols);
+        let y = randint(rows);
+        const arr = withinArea(exit.x, exit.y, 2);
+        console.log(arr);
+        if (arr !== null && numAtExit < 5) {
+            x = arr[0];
+            y = arr[1];
+            numAtExit++;
+        }
+
         if (canPlace(x, y)) {
             let t = createTower(x, y, tower[tierSet[randomTier-1]]);
             buy(t);
@@ -271,6 +275,17 @@ function createTowers(roundNum) {
     } 
     godMode = false;
     toPlace = false;  
+}
+
+function withinArea(x, y, r) {
+    for (let i = x - r; i < x + r; i++) {
+        for (let j = y - r; j < y + r; j++) {
+            if (x == i && y == j) continue;
+            if (canPlace(i, j)) return [i, j];
+        }
+    }
+
+    return null;
 }
 
 function canUpgrade(roundNum, maximumTier, randomTier) {
@@ -477,6 +492,7 @@ function resetGame() {
     }
     maxHealth = health;
     createTowers(wave);
+    recalculate();
 }
 
 //Forces tile-size to acceptable value, scales canvas accordingly.
@@ -610,6 +626,7 @@ function preload() {
         var div = document.getElementById('sketch-holder');
         var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
         canvas.parent('sketch-holder');
+        resizeFit();
         resetGame();
     }
 

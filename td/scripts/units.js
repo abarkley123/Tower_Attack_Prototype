@@ -23,6 +23,16 @@ unit.weak = {
     // Stats
     cash: 1,
     health: 10,
+    // draw: function() {
+    //     push();
+    //     translate(this.pos.x + ts/2, this.pos.y);
+    //     rotate((3*PI)/2);
+    //     rotate(PI/2 - this.vel.heading());
+    //     scale(0.25);
+    //     image(this.image, 0, 0);
+    //     pop();
+    // },
+    // image: loadImage('images/units/weak.png')
 };
 
 unit.strong = {

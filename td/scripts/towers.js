@@ -173,7 +173,7 @@ tower.laser = {
             drawBarrel: function() {
                 stroke(this.border);
                 fill(this.secondary);
-                rect(0, -this.width * ts / 2 * 0.67, this.length * ts, this.width * ts * 0.67);
+                rect(0, -this.width * ts / 2 * 0.67, this.length * ts, this.width * ts * 0.72);
                 ellipse(this.width * ts, this.width * ts - 0.33 * ts, this.radius/2 * ts, this.radius/2 * ts);
             }
         }
