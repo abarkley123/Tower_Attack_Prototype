@@ -4,7 +4,7 @@ html, body {
 }
 
 body {
-    background-color:#000033 ;
+    background-color:#320900;
     color: #303C6C;
     display: flex;
     flex-direction: column;
@@ -50,24 +50,49 @@ a:link, a:visited {
     color: #303C6C;
 }
 
+section {
+   max-height: 10%;
+   background: url("../images/action_bar_bg.jpg");
+}
+
 #left-asides, #right-asides {
     display: flex;
     flex-direction: column;
 }
 
-#left-asides {
+#recruit_bar {
     margin-left: 2px;
+    display:inline-block;
 }
 
-#right-asides {
+#recruit-container {
+  margin: 1% 1% 0 1%;
+  width:10vh;
+}
+
+#raction_bar {
     margin-right: 2px;
-    min-width: 195px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-aside {
-    padding: 14px;
+#store_div {
+  display:inline-block;
+  width: 80%;
+  height: 100%;
 }
 
+.group {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  height:100%;
+}
+
+.row_1, .row_2 {
+  height: 100%;
+  display: inline-block;
+}
 
 .group p:last-of-type {
     margin-top: 0;
@@ -75,12 +100,15 @@ aside {
 
 #store {
     flex: 1;
+    height:9vh;
 }
 
 #store button, #map-aside button {
-    min-width: 100%;
+    min-width: 10vh;
     text-align: center;
     text-shadow: none;
+    height: 100%;
+    width: 20vh;
 }
 
 #sketch-holder {
@@ -102,7 +130,7 @@ canvas {
 }
 
 button, select {
-    background-color: #5D001E;
+    /* background-color: #5D001E; */
     color: #E3E2DF;
     font-family: 'Source Code Pro', monospace;
     font-size: 0.85em;
@@ -117,11 +145,11 @@ button {
     display: flex;
     flex-direction: column;
     width: 75%;
+    height: 11vh;
 }
 
 .horiz-buttons button {
     color: #E3E2DF;
-    margin-top:5%;
     display: block;
     flex: 1;
     text-align: center;
@@ -129,8 +157,20 @@ button {
     border-radius: 8px;
 }
 
+#start_buttons {
+  display:inline-block;
+  margin: 0.5% 0 0.5% 0;
+  float: right;
+  width:18%;
+  height: 100%;
+}
+
 #status {
     font-size: 0.95em;
+    position:absolute;
+    top: 0;
+    right: 0;
+    overflow-y: hidden;
 }
 
 #info {
@@ -162,6 +202,30 @@ button {
     background-color: rgb(25, 181, 254);
 }
 
+#pause {
+   /* border: 1px outset blue; */
+   background-color: lightBlue;
+   height:100%;
+   width:100%;
+   color: black;
+   cursor:pointer;
+   margin: 5px;
+}
+
+#pause:hover {
+   background-color: blue;
+   color:white;
+}
+
+#weak-div {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+#weak-div p {
+  display: inline-block;
+  margin-top: 1%;
+}
 
 .Unit {
     margin: 5%;
@@ -169,6 +233,7 @@ button {
     color: #E3E2DF;
     border: none;
     border-radius: 8px;
+    height:100%;
 }
 
 @media only screen and (max-height: 1000px) {

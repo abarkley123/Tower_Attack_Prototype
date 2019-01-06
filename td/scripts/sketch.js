@@ -906,7 +906,7 @@ function updateOverlay(id) {
     document.getElementById('unit_info').style.display = 'block';
     let displayCapability = 'none';
     if (canRecruit(id)) {
-       displayCapability= 'block';
+       displayCapability= 'inline-block';
     } 
     document.getElementById('recruit-container').style.display = displayCapability;
     showUnitInfo(id);
@@ -944,14 +944,10 @@ function showUnitInfo(id) {
         let name = document.getElementById('unitName');
         const thisUnit = createUnit(0, 0, unit[id]);
         const unitName = id.charAt(0).toUpperCase() + id.slice(1);
-        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + ')">' + unitName +
-        '</span>';
+        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + ')">' + unitName + '</span>';
         document.getElementById('unitCost').innerHTML = 'Price: $' + thisUnit.cash;
         document.getElementById('unitHealth').innerHTML = 'Health: ' + thisUnit.health;
-        prettyPrintArrayFor('unitResistance', thisUnit.resistant);
-        prettyPrintArrayFor('unitWeakness', thisUnit.weak);
         document.getElementById('unitSpeed').innerHTML = 'Speed: ' + thisUnit.speed;
-        document.getElementById('taunts').innerHTML = 'Draws fire: ' + thisUnit.taunt;
         document.getElementById('unitDamage').innerHTML = 'Damage: ' + thisUnit.damage;
 }
 
