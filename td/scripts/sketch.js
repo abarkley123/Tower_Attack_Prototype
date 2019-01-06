@@ -439,13 +439,14 @@ function recalculate() {
         var distance = {};
         cameFrom[target] = null;
         distance[target] = 0;
-
+       // console.log(frontier);
         // Fill cameFrom and distance for every tile
         while (frontier.length !== 0) {
             var current = frontier.shift();
             var t = stv(current);
+           // console.log(t);
             var adj = neighbors(walkMap, t.x, t.y, true);
-
+           // console.log(adj);
             for (var i = 0; i < adj.length; i++) {
                 var next = adj[i];
                 if (!(next in cameFrom) || !(next in distance)) {
@@ -457,12 +458,13 @@ function recalculate() {
         }
 
         // // Generate usable maps
-         dists = buildArray(cols, rows, null);
+        dists = buildArray(cols, rows, null);
         var newPaths = buildArray(cols, rows, 0);
         //console.log(newPaths);
         var keys = Object.keys(cameFrom);
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
+
             var current = stv(key);
 
             // Distance map
@@ -487,8 +489,17 @@ function recalculate() {
 
 function determineWaypoints() {
     const canvas = document.getElementById('defaultCanvas0');
-    const width = canvas.width / ts;
-    const height = canvas.height / ts;
+    const action = document.getElementById('action');
+    let width;
+    let height; 
+    const isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    if (isMobile) {
+        width = (canvas.height - action.height) / ts;
+        height = canvas.width / ts;
+    } else {
+        width = canvas.width / ts;
+        height = (canvas.height - action.height) / ts;
+    }
 
     waypoints = [];
     waypoints.push(createVector(width/8.7, height/2.5));
@@ -532,7 +543,9 @@ function resetGame() {
 window.onresize = function(event) {
     var div = document.getElementById('sketch-holder');
     document.getElementById('defaultCanvas0').remove();
-    let canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    var canvas = createCanvas(100, 100);
     canvas.parent('sketch-holder');
     resizeMax();
     resizeFit();
@@ -540,20 +553,27 @@ window.onresize = function(event) {
 
 //Forces tile-size to acceptable value, scales canvas accordingly.
 function resizeFit() {
-    var div = document.getElementById('sketch-holder');
-    var ts1 = floor(div.offsetWidth / cols);
-    var ts2 = floor(div.offsetHeight / rows);
+    let div = document.getElementById('sketch-holder');
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    var ts1 = floor(div.offsetWidth/cols);
+    var ts2 = floor(height/rows);
     ts = Math.min(ts1, ts2);
     resizeCanvas(cols * ts, rows * ts, true);
+    document.getElementById('defaultCanvas0').style.maxHeight = height;
     document.getElementById('defaultCanvas0').style.width = '100%';
     document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
 //Determines number of cols, rows based on viewport sizes, scales canvas accordingly.
 function resizeMax() {
-    var div = document.getElementById('sketch-holder');
     cols = 48;
     rows = 30;
+    const isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    if (isMobile) {
+        cols/=1.5;
+        rows/=1.5;
+    }
     document.getElementById('defaultCanvas0').style.width = '100%';
     document.getElementById('defaultCanvas0').style.height = '100%';
 }
@@ -646,8 +666,15 @@ function preload() {
 
 function setup() {
     var div = document.getElementById('sketch-holder');
-    var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    var canvas = createCanvas(100, 100);
+    let canv = document.getElementById('defaultCanvas0');
+    canv.width = div.offsetWidth;
+    canv.height = height;
     canvas.parent('sketch-holder');
+    div.setAttribute("style","height:" + height + "px");
+    document.getElementById("main_holder").setAttribute("style", "max-height:" + height + "px");
     resizeFit();
     resetGame();
 }
@@ -824,6 +851,8 @@ function mousePressed() {
 }
 
 $('#recruit').on('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     const id = getUnitNameAsUnit();
 
     if (canRecruit(id)) {
@@ -908,7 +937,7 @@ function createOverlay(id) {
     const visibility = document.getElementById('unit_info').style.display;
 
     if (visibility === 'block' && id === getUnitNameAsUnit()) {
-        document.getElementById('unit_info').style.display = 'none';
+        //document.getElementById('unit_info').style.display = 'none';
         document.getElementById('unitName').innerHTML = '';
     } else if (visibility === 'none' || id !== getUnitNameAsUnit()) {
         updateOverlay(id);
@@ -918,10 +947,7 @@ function createOverlay(id) {
 function updateOverlay(id) {
     if (id === null || id.length <= 0) return;
     document.getElementById('unit_info').style.display = 'block';
-    let displayCapability = 'none';
-    if (canRecruit(id)) {
-       displayCapability= 'inline-block';
-    } 
+    let displayCapability = 'inline-block'; 
     document.getElementById('recruit-container').style.display = displayCapability;
     showUnitInfo(id);
 }
@@ -958,7 +984,7 @@ function showUnitInfo(id) {
         let name = document.getElementById('unitName');
         const thisUnit = createUnit(0, 0, unit[id]);
         const unitName = id.charAt(0).toUpperCase() + id.slice(1);
-        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + ')">' + unitName + '</span>';
+        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + '); display:none">' + unitName + '</span>';
         document.getElementById('unitCost').innerHTML = 'Price: $' + thisUnit.cash;
         document.getElementById('unitHealth').innerHTML = 'Health: ' + thisUnit.health;
         document.getElementById('unitSpeed').innerHTML = 'Speed: ' + thisUnit.speed;

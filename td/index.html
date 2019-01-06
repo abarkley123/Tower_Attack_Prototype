@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Tower Attack</title>
-    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet" >
     <script src="scripts/jquery.min.js"></script>
     <script src="scripts/lib/lz-string.min.js" defer></script>
     <script src="scripts/lib/p5.min.js" defer></script>
@@ -25,20 +25,55 @@
     <script src="scripts/sketch.js" defer></script>
   </head>
   <body>
-    <main>
-
-      <div id="sketch-holder"></div>
-      <div class="clearfix"></div>
-
-        <aside id="status">
-          <p id="wave"></p>
-          <p id="health"></p>
-          <p id="cash"></p><br>
-        </aside>
-
-</main>
-<section>
-      <div id="action_bar">
+    <main id = "main_holder" style="max-height: 90%">
+      <aside id="store_div" style="width:15%">
+        <aside id="store" style="width:100%;display:inline-block">
+          <div class="group">
+            <p class="row_1">
+              <button class="Unit" id="weak">
+                <img src="images/units/weak_1.png" style="max-width:60%">
+              </button>
+          <button class="Unit" id="strong">
+            <img src="images/units/weak_1.png" style="max-width:60%">
+          </button></p>
+            <p class="row_1">
+              <button class="Unit" id='fast'>
+                <img src="images/units/weak_1.png" style="max-width:60%">
+              </button>
+            <button class="Unit" id='blend'>
+            <img src="images/units/weak_1.png" style="max-width:60%">
+          </button></p>
+            <p class="row_1">
+              <button class="Unit" id="stronger">
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button>
+              <button class="Unit" id='faster'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button></p>
+            <p class="row_2">
+              <button class="Unit" id='spawner'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button>
+              <button class="Unit" id='tank'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button></p>
+            <p class="row_2">
+              <button class="Unit" id='medic'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button>
+              <button class="Unit" id='regen'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button></p>
+            <p class="row_2">
+              <button class="Unit" id='taunt'>
+              <img src="images/units/weak_1.png" style="max-width:60%">
+            </button>
+              <button class="Unit" id='hive'>
+                <img src="images/units/weak_1.png" style="max-width:60%">
+              </button></p>
+          </div>
+      </aside>
+      <aisde id="unit_bar">
         <aside id="info">
           <div id="info-div">
             <h3 id="name"></h3>
@@ -53,13 +88,45 @@
               <button id="sell" onclick="if (selected) sell(selected)">Sabotage</button>
             </div>
           </div>
+        </aside>        
+      </aisde>
+        <aside id="unit_bar">
+          <div class="group" style="display:inline-block; overflow-x: hidden; height: 8vh;">
+            <p id="upgrades" style='text-align:center; color: black; width: 20%'><button class="Upgrade" id="passive">Income<br></button>
+              <span><b>Currently <strong id='passive_1'>1</strong> p/s</b></span><br>
+              <span><b>Costs <strong id="passive_2">100</strong> to increase <strong id="passive_3">2x</b></strong></span></p>
+          </div>
+
         </aside>
-      <aside id="unit_info" style="display:none">
-      <h2 id="unitName" style="margin:20px 5px; display:none;"></h2>
-        <div id="recruit-container" class="btn-container">
-            <a href="#" id='recruit' style="padding: 0.5% 0 0.5% 0">Recruit</a>
+    </aside>
+      <div id="sketch-holder" style="max-height:90vh"></div>
+      <div class="clearfix"></div>
+
+        <aside id="status">
+          <p id="wave"></p>
+          <p id="health"></p>
+          <p id="cash"></p><br>
+        </aside>
+
+  </main>
+  <section id="action">
+      <div id="action_bar">
+      <aside id="unit_info">
+      <h2 id="unitName" style="margin:20px 5px; display: none;"></h2>
+        <div id="recruit-container" class="btn-container" style="display:none;">
+            <a href="/Spawn a unit." id='recruit' style="padding: 0.5% 0 0.5% 0;">
+              <img id='recruiter' src="images/units/weak_1.png" style="max-width:60%">
+            </a>
         </div> 
-        <div style="padding-left:4%;" id="weak-div">
+              <aside id="store_div">
+        <aside id="start_buttons">
+        <div class="horiz-buttons">
+            <button id="pause" onclick="pause()">Start</button>
+            <!-- <button onclick="resetGame()">Restart</button> -->
+          </div>
+        </aside>
+      </aside>
+        <div style="padding-left:2%; font-size:2em;" id="weak-div">
                 <p id="unitCost"></p>
                 <p id="unitHealth"></p>
                 <p id="unitResistance"></p>
@@ -69,43 +136,8 @@
                 <p id="unitDamage"></p>
                 <p id="upgradePrice"></p>
         </div>
-      </aside>
-    
-      <aside id="store_div">
-        <aside id="store" style="width:60%;display:inline-block">
-          <div class="group">
-            <p class="row_1"><button class="Unit" id="weak">Weak Unit</button></p>
-            <p class="row_1"><button class="Unit" id="strong">Strong Unit</button></p>
-            <p class="row_1"><button class="Unit" id='fast'>Fast Unit</button></p>
-            <p class="row_1"><button class="Unit" id='blend'>Blend Unit</button></p>
-            <p class="row_1"><button class="Unit" id="stronger">Stronger Unit</button></p>
-            <p class="row_1"><button class="Unit" id='faster'>Faster Unit</button></p>
-            <p class="row_2"><button class="Unit" id='spawner'>Spawner Unit</button></p>
-            <p class="row_2"><button class="Unit" id='tank'>Tank Unit</button></p>
-            <p class="row_2"><button class="Unit" id='medic'>Medic Unit</button></p>
-            <p class="row_2"><button class="Unit" id='regen'>Regen Unit</button></p>
-            <p class="row_2"><button class="Unit" id='taunt'>Aggro Unit</button></p>
-            <p class="row_2"><button class="Unit" id='hive'>Hive Unit</button></p>
-          </div>
-        </aside>
-
-       
-          <div class="group" style="display:inline-block; overflow-x: hidden; height: 8vh;">
-            <p id="upgrades" style='text-align:center; color: black;'><button class="Upgrade" id="passive">Passive income<br></button>
-              <span><b>Currently <strong id='passive_1'>1</strong> p/s</b></span><br>
-              <span><b>Costs <strong id="passive_2">100</strong> to increase <strong id="passive_3">2x</b></strong></span></p>
-          </div>
-
-      </aside>
-
-        <aside id="start_buttons">
-        <div class="horiz-buttons">
-            <button id="pause" onclick="pause()">Start</button>
-            <!-- <button onclick="resetGame()">Restart</button> -->
-          </div>
-        </aside>
-
+    </aside>
 </section>
-
+      <div class="clearfix"></div>
   </body>
 </html>
