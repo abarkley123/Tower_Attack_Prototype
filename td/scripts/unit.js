@@ -97,6 +97,7 @@ class Unit {
     }
 
     onExit() {
+        console.log('at unit death.');
         health -= this.damage;
         cash += this.damage * (wave+1);
         this.kill();
@@ -148,7 +149,7 @@ class Unit {
         }
         
         // Movement
-        this.vel.limit(96 / ts);
+        //this.vel.limit(96 / ts);
         this.vel.limit(this.pxSpeed());
         this.pos.add(this.vel);
     }

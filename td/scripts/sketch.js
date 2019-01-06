@@ -398,8 +398,6 @@ function randomMap(numSpawns) {
         }
     }
     walkMap = getWalkMap();
-    generateExit(walkMap);
-    generateSpawns(walkMap);
 }
 
 function generateExit(walkMap) {
@@ -413,7 +411,11 @@ function generateExit(walkMap) {
 
 function generateSpawns(walkMap) {
     spawnpoints = [];
-    let s = createVector(floor(cols/8.5), 0);
+    
+    const div = document.getElementById('sketch-holder');
+    const divWidth = div.offsetWidth / ts;
+    const s = createVector(floor(divWidth/8.7), 0);
+
     spawnpoints.push(s);
 }
 
@@ -425,6 +427,8 @@ function randomTile() {
 // Recalculate pathfinding maps
 // Algorithm from https://www.redblobgames.com/pathfinding/tower-defense/
 function recalculate() {
+    generateExit(walkMap);
+    generateSpawns(walkMap);
     determineWaypoints();
     walkMap = getWalkMap();
     for (let num = 0; num < 8; num++) {
@@ -482,15 +486,21 @@ function recalculate() {
 }
 
 function determineWaypoints() {
+    const canvas = document.getElementById('defaultCanvas0');
+    const width = canvas.width / ts;
+    const height = canvas.height / ts;
+
     waypoints = [];
-    waypoints.push(createVector(floor(cols/8.5), rows/2.7));
-    waypoints.push(createVector(cols/2.18, rows/2.7));
-    waypoints.push(createVector(cols/2.18, rows/11));
-    waypoints.push(createVector(cols/1.2, rows/11));
-    waypoints.push(createVector(cols/1.2, rows/1.11));
-    waypoints.push(createVector(cols/2.18, rows/1.11));
-    waypoints.push(createVector(cols/2.18, rows/1.58));
-    waypoints.push(createVector(0, rows / 1.55));
+    waypoints.push(createVector(width/8.7, height/2.5));
+    
+    waypoints.push(createVector(width/2.22, height/2.5));
+
+    waypoints.push(createVector(width/2.22, height/12.5));
+    waypoints.push(createVector(width/1.212, height/12.5));
+    waypoints.push(createVector(width/1.212, height/1.19));
+    waypoints.push(createVector(width/2.22, height/1.19));
+    waypoints.push(createVector(width/2.22, height/1.56));
+    waypoints.push(createVector(0, height/1.56));
 }
 
 function resetGame() {
@@ -699,14 +709,14 @@ function draw() {
                     }
                 }
             } catch (NoSuchElementException) {
-                console.log("Element already killed." + NoSuchElementException);
+                console.log("Unit already killed." + NoSuchElementException);
             }
 
 
             // Kill if outside map
             if (outsideMap(e)) {
-                    e.kill();
-                    break;
+                e.kill();
+                break;
             }
 
             // Draw
@@ -729,7 +739,11 @@ function draw() {
 
             // Target units and update cooldowns
             if (!paused) {
-                t.target(units);
+                try {
+                    t.target(units);
+                } catch (NoSuchUnitException) {
+                    console.log(NoSuchUnitException);
+                }
                 t.update();
             }
 

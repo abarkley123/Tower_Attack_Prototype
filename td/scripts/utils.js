@@ -338,8 +338,9 @@ function vts(v) {
 }
 
 function inRange(x1, y1, x2, y2) {
-    if ((x1 - x2 < 24 && x1 - x2 >= 0) || (x1 - x2 > -24 && x1 - x2 <= 0)) {
-        if ( (y1 - y2 < 24 && y1 - y2 >= 0) || (y1 - y2 > -24 && y1 - y2 <= 0)) {
+    let bound = 2 * (ts/3);
+    if ((x1 - x2 < bound && x1 - x2 >= 0) || (x1 - x2 > -bound && x1 - x2 <= 0)) {
+        if ( (y1 - y2 < bound && y1 - y2 >= 0) || (y1 - y2 > -bound && y1 - y2 <= 0)) {
             return true;
         }
     }

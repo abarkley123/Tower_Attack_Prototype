@@ -82,6 +82,10 @@ section {
   height: 100%;
 }
 
+#upgrades {
+  font-color: black;
+}
+
 .group {
   overflow-x: scroll;
   overflow-y: hidden;
@@ -101,6 +105,7 @@ section {
 #store {
     flex: 1;
     height:9vh;
+    margin-left: 0.5%;
 }
 
 #store button, #map-aside button {
@@ -145,7 +150,7 @@ button {
     display: flex;
     flex-direction: column;
     width: 75%;
-    height: 11vh;
+    height: 8vh;
 }
 
 .horiz-buttons button {
@@ -228,12 +233,32 @@ button {
 }
 
 .Unit {
-    margin: 5%;
     background-color: #5D001E;
     color: #E3E2DF;
     border: none;
     border-radius: 8px;
     height:100%;
+    background: url("../images/bg_3.png");
+}
+
+@media only screen and (min-width: 1900px) {
+  #store {
+    width: 80% !important;
+  }
+  .row_1, .row_2 {
+    width: 22vh;
+  }
+}
+
+@media only screen and (min-width: 1600px) {
+  .group {
+    overflow: hidden;
+    white-space: normal;
+  }
+  .row_1, .row_2 {
+    height: 4vh;
+    margin-bottom: 0px;
+  }
 }
 
 @media only screen and (max-height: 1000px) {
