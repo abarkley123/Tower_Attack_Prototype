@@ -81,6 +81,7 @@ var weakness = 0.5;     // damage increase from weakness
 var passiveIncome = 1;
 var sabotagedTowers = 0;
 // Misc functions
+var landscape = false;
 
 var upgrades = {
     'passive' : {
@@ -543,39 +544,82 @@ function resetGame() {
 window.onresize = function(event) {
     var div = document.getElementById('sketch-holder');
     document.getElementById('defaultCanvas0').remove();
+    if (isMobile()) {
+        //determine landscape
+        if (window.innerHeight < window.innerWidth) {
+            landscape = true;
+        } else {
+            landscape = false;
+        }
+    }
+    sizeCanvas();
+};
+
+$('#hive').on('click', function(event) {
+    toFullscreen();
+});
+
+function sizeCanvas() {
     var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
     let height = (wHeight - document.getElementById('action').offsetHeight);
+    console.log(height);
     var canvas = createCanvas(100, 100);
     canvas.parent('sketch-holder');
     resizeMax();
     resizeFit();
-};
-
-//Forces tile-size to acceptable value, scales canvas accordingly.
-function resizeFit() {
-    let div = document.getElementById('sketch-holder');
-    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
-    let height = (wHeight - document.getElementById('action').offsetHeight);
-    var ts1 = floor(div.offsetWidth/cols);
-    var ts2 = floor(height/rows);
-    ts = Math.min(ts1, ts2);
-    resizeCanvas(cols * ts, rows * ts, true);
-    document.getElementById('defaultCanvas0').style.maxHeight = height;
-    document.getElementById('defaultCanvas0').style.width = '100%';
-    document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
 //Determines number of cols, rows based on viewport sizes, scales canvas accordingly.
 function resizeMax() {
     cols = 48;
     rows = 30;
-    const isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-    if (isMobile) {
+    if (isMobile()) {
         cols/=1.5;
         rows/=1.5;
     }
     document.getElementById('defaultCanvas0').style.width = '100%';
     document.getElementById('defaultCanvas0').style.height = '100%';
+}
+
+function toFullscreen() {
+    if ((document.fullScreenElement && document.fullScreenElement !== null) ||
+        (!document.mozFullScreen && !document.webkitIsFullScreen)) {
+        if (document.documentElement.requestFullScreen) {
+            document.documentElement.requestFullScreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullScreen) {
+            document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    } else {
+        if (document.cancelFullScreen) {
+            document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        }
+    }
+}
+
+
+//Forces tile-size to acceptable value, scales canvas accordingly.
+function resizeFit() {
+    let div = document.getElementById('sketch-holder');
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    console.log(height);
+    var ts1 = floor(div.offsetWidth/cols);
+    var ts2 = floor(height/rows);
+    ts = Math.min(ts1, ts2);
+    resizeCanvas(cols * ts, rows * ts, true);
+    document.getElementById('sketch-holder').setAttribute('style', 'height: ' + height + 'px;');
+    document.getElementById('defaultCanvas0').style.width = '100%';
+    document.getElementById('defaultCanvas0').style.height = '100%';
+}
+
+function isMobile() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
 
 // Sell a tower - functions to sabotage currently

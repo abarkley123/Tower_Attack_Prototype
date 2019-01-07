@@ -95,8 +95,10 @@ section {
   height: 100%;
 }
 
-aside #store_div {
-  width : 40%;
+#store_but {
+  display:inline-block;
+  width: 80%;
+  height: 100%;  
   float: right;
   margin: 0.5vh;
 }
@@ -307,8 +309,24 @@ button {
 @media only screen and (min-width: 500px) {
     .Unit {
       width: 7vw !important;
-      height: 50% !important;
+      height: 80% !important;
       margin-right: 1px;
+    }
+    .Unit img {
+      max-width: 70% !important;
+      float: left;
+    }
+    .row_1, .row_2 {
+      height: 11vh
+    }
+    #store_div {
+      width: 13% !important;
+    }
+    #store_but {
+      width: 25% !important;
+    }
+    #unit_bar {
+      width: 6vw !important;
     }
 }
 
@@ -405,6 +423,61 @@ button {
     width: 3vw !important;
   }
 }
+
+@media only screen and (max-height: 500px) and (min-width: 1600px) {
+  .row_1, .row_2 {
+    height: 11vh;
+    margin-bottom:2px;
+  }
+  .Unit img {
+    max-width: 60%;
+  }
+}
+
+@media only screen and (max-height: 700px) and (min-width: 1900px) {
+  .row_1, .row_2 {
+    height: 11vh;
+    margin-bottom:2px;
+  }
+  .Unit img {
+    max-width: 60%;
+  }
+}
+
+@media only screen and (max-height: 300px) and (max-width: 500px) {
+  .row_1, .row_2 {
+    height: 13vh;
+    margin-bottom:2px;
+  }
+  .Unit img {
+    max-width: 3vw !important;
+  }
+  #store_div {
+    width : 12%;
+  }
+  .Unit {
+    height: 100%;
+  }
+}
+
+
+@media only screen and (max-height: 300px) and (max-width: 900px) {
+  .row_1, .row_2 {
+    height: 10vh !important;
+    margin-bottom:2px !important;
+    width: 100%;
+  }
+  .Unit {
+    height: 100% !important;
+  }
+  .Unit img {
+    max-width: 3vw !important;
+  }
+  #store_div {
+    width : 12%!important;
+  }
+}
+
 
 @media only screen and (max-height: 1000px) {
   .Unit {
