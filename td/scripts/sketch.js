@@ -81,6 +81,7 @@ var weakness = 0.5;     // damage increase from weakness
 var passiveIncome = 1;
 var sabotagedTowers = 0;
 // Misc functions
+var landscape = false;
 
 var upgrades = {
     'passive' : {
@@ -398,8 +399,6 @@ function randomMap(numSpawns) {
         }
     }
     walkMap = getWalkMap();
-    generateExit(walkMap);
-    generateSpawns(walkMap);
 }
 
 function generateExit(walkMap) {
@@ -413,7 +412,11 @@ function generateExit(walkMap) {
 
 function generateSpawns(walkMap) {
     spawnpoints = [];
-    let s = createVector(floor(cols/8.5), 0);
+    
+    const div = document.getElementById('sketch-holder');
+    const divWidth = div.offsetWidth / ts;
+    const s = createVector(floor(divWidth/8.7), 0);
+
     spawnpoints.push(s);
 }
 
@@ -425,6 +428,8 @@ function randomTile() {
 // Recalculate pathfinding maps
 // Algorithm from https://www.redblobgames.com/pathfinding/tower-defense/
 function recalculate() {
+    generateExit(walkMap);
+    generateSpawns(walkMap);
     determineWaypoints();
     walkMap = getWalkMap();
     for (let num = 0; num < 8; num++) {
@@ -435,13 +440,14 @@ function recalculate() {
         var distance = {};
         cameFrom[target] = null;
         distance[target] = 0;
-
+       // console.log(frontier);
         // Fill cameFrom and distance for every tile
         while (frontier.length !== 0) {
             var current = frontier.shift();
             var t = stv(current);
+           // console.log(t);
             var adj = neighbors(walkMap, t.x, t.y, true);
-
+           // console.log(adj);
             for (var i = 0; i < adj.length; i++) {
                 var next = adj[i];
                 if (!(next in cameFrom) || !(next in distance)) {
@@ -453,12 +459,13 @@ function recalculate() {
         }
 
         // // Generate usable maps
-         dists = buildArray(cols, rows, null);
+        dists = buildArray(cols, rows, null);
         var newPaths = buildArray(cols, rows, 0);
         //console.log(newPaths);
         var keys = Object.keys(cameFrom);
         for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
+
             var current = stv(key);
 
             // Distance map
@@ -482,15 +489,30 @@ function recalculate() {
 }
 
 function determineWaypoints() {
+    const canvas = document.getElementById('defaultCanvas0');
+    const action = document.getElementById('action');
+    let width;
+    let height; 
+    const isMobile = (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    if (isMobile) {
+        width = (canvas.height - action.height) / ts;
+        height = canvas.width / ts;
+    } else {
+        width = canvas.width / ts;
+        height = (canvas.height - action.height) / ts;
+    }
+
     waypoints = [];
-    waypoints.push(createVector(floor(cols/8.5), rows/2.7));
-    waypoints.push(createVector(cols/2.18, rows/2.7));
-    waypoints.push(createVector(cols/2.18, rows/11));
-    waypoints.push(createVector(cols/1.2, rows/11));
-    waypoints.push(createVector(cols/1.2, rows/1.11));
-    waypoints.push(createVector(cols/2.18, rows/1.11));
-    waypoints.push(createVector(cols/2.18, rows/1.58));
-    waypoints.push(createVector(0, rows / 1.55));
+    waypoints.push(createVector(width/8.7, height/2.5));
+    
+    waypoints.push(createVector(width/2.22, height/2.5));
+
+    waypoints.push(createVector(width/2.22, height/12.5));
+    waypoints.push(createVector(width/1.212, height/12.5));
+    waypoints.push(createVector(width/1.212, height/1.19));
+    waypoints.push(createVector(width/2.22, height/1.19));
+    waypoints.push(createVector(width/2.22, height/1.56));
+    waypoints.push(createVector(0, height/1.56));
 }
 
 function resetGame() {
@@ -522,30 +544,82 @@ function resetGame() {
 window.onresize = function(event) {
     var div = document.getElementById('sketch-holder');
     document.getElementById('defaultCanvas0').remove();
-    let canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    if (isMobile()) {
+        //determine landscape
+        if (window.innerHeight < window.innerWidth) {
+            landscape = true;
+        } else {
+            landscape = false;
+        }
+    }
+    sizeCanvas();
+};
+
+$('#hive').on('click', function(event) {
+    toFullscreen();
+});
+
+function sizeCanvas() {
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    console.log(height);
+    var canvas = createCanvas(100, 100);
     canvas.parent('sketch-holder');
     resizeMax();
     resizeFit();
-};
-
-//Forces tile-size to acceptable value, scales canvas accordingly.
-function resizeFit() {
-    var div = document.getElementById('sketch-holder');
-    var ts1 = floor(div.offsetWidth / cols);
-    var ts2 = floor(div.offsetHeight / rows);
-    ts = Math.min(ts1, ts2);
-    resizeCanvas(cols * ts, rows * ts, true);
-    document.getElementById('defaultCanvas0').style.width = '100%';
-    document.getElementById('defaultCanvas0').style.height = '100%';
 }
 
 //Determines number of cols, rows based on viewport sizes, scales canvas accordingly.
 function resizeMax() {
-    var div = document.getElementById('sketch-holder');
     cols = 48;
     rows = 30;
+    if (isMobile()) {
+        cols/=1.5;
+        rows/=1.5;
+    }
     document.getElementById('defaultCanvas0').style.width = '100%';
     document.getElementById('defaultCanvas0').style.height = '100%';
+}
+
+function toFullscreen() {
+    if ((document.fullScreenElement && document.fullScreenElement !== null) ||
+        (!document.mozFullScreen && !document.webkitIsFullScreen)) {
+        if (document.documentElement.requestFullScreen) {
+            document.documentElement.requestFullScreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullScreen) {
+            document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    } else {
+        if (document.cancelFullScreen) {
+            document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        }
+    }
+}
+
+
+//Forces tile-size to acceptable value, scales canvas accordingly.
+function resizeFit() {
+    let div = document.getElementById('sketch-holder');
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    console.log(height);
+    var ts1 = floor(div.offsetWidth/cols);
+    var ts2 = floor(height/rows);
+    ts = Math.min(ts1, ts2);
+    resizeCanvas(cols * ts, rows * ts, true);
+    document.getElementById('sketch-holder').setAttribute('style', 'height: ' + height + 'px;');
+    document.getElementById('defaultCanvas0').style.width = '100%';
+    document.getElementById('defaultCanvas0').style.height = '100%';
+}
+
+function isMobile() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
 
 // Sell a tower - functions to sabotage currently
@@ -636,8 +710,15 @@ function preload() {
 
 function setup() {
     var div = document.getElementById('sketch-holder');
-    var canvas = createCanvas(div.offsetWidth, div.offsetHeight);
+    var wHeight = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+    let height = (wHeight - document.getElementById('action').offsetHeight);
+    var canvas = createCanvas(100, 100);
+    let canv = document.getElementById('defaultCanvas0');
+    canv.width = div.offsetWidth;
+    canv.height = height;
     canvas.parent('sketch-holder');
+    div.setAttribute("style","height:" + height + "px");
+    document.getElementById("main_holder").setAttribute("style", "max-height:" + height + "px");
     resizeFit();
     resetGame();
 }
@@ -699,14 +780,14 @@ function draw() {
                     }
                 }
             } catch (NoSuchElementException) {
-                console.log("Element already killed." + NoSuchElementException);
+                console.log("Unit already killed." + NoSuchElementException);
             }
 
 
             // Kill if outside map
             if (outsideMap(e)) {
-                    e.kill();
-                    break;
+                e.kill();
+                break;
             }
 
             // Draw
@@ -729,7 +810,11 @@ function draw() {
 
             // Target units and update cooldowns
             if (!paused) {
-                t.target(units);
+                try {
+                    t.target(units);
+                } catch (NoSuchUnitException) {
+                    console.log(NoSuchUnitException);
+                }
                 t.update();
             }
 
@@ -810,6 +895,8 @@ function mousePressed() {
 }
 
 $('#recruit').on('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     const id = getUnitNameAsUnit();
 
     if (canRecruit(id)) {
@@ -894,7 +981,7 @@ function createOverlay(id) {
     const visibility = document.getElementById('unit_info').style.display;
 
     if (visibility === 'block' && id === getUnitNameAsUnit()) {
-        document.getElementById('unit_info').style.display = 'none';
+        //document.getElementById('unit_info').style.display = 'none';
         document.getElementById('unitName').innerHTML = '';
     } else if (visibility === 'none' || id !== getUnitNameAsUnit()) {
         updateOverlay(id);
@@ -904,10 +991,7 @@ function createOverlay(id) {
 function updateOverlay(id) {
     if (id === null || id.length <= 0) return;
     document.getElementById('unit_info').style.display = 'block';
-    let displayCapability = 'none';
-    if (canRecruit(id)) {
-       displayCapability= 'inline-block';
-    } 
+    let displayCapability = 'inline-block'; 
     document.getElementById('recruit-container').style.display = displayCapability;
     showUnitInfo(id);
 }
@@ -944,7 +1028,7 @@ function showUnitInfo(id) {
         let name = document.getElementById('unitName');
         const thisUnit = createUnit(0, 0, unit[id]);
         const unitName = id.charAt(0).toUpperCase() + id.slice(1);
-        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + ')">' + unitName + '</span>';
+        name.innerHTML = '<span style="color:rgb(' + thisUnit.color + '); display:none">' + unitName + '</span>';
         document.getElementById('unitCost').innerHTML = 'Price: $' + thisUnit.cash;
         document.getElementById('unitHealth').innerHTML = 'Health: ' + thisUnit.health;
         document.getElementById('unitSpeed').innerHTML = 'Speed: ' + thisUnit.speed;
