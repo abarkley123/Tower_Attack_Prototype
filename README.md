@@ -5,9 +5,10 @@ This is a web-based Tower defense game written in JavaScript, with some addition
 
 ## Getting Started
 
-Since this game is purely web-based, that means getting started is simple. Clone/fork/download the code and you can simply open the sketch.js file in your browser. Alternatively, you may bind sketch.js to the landing page of a local webserver, specifiying a port to use e.g http://localhost:8080. 
+Since this game is purely web-based, that means getting started is simple. Clone/fork/download the code and you can simply open the index.html file in your browser. Alternatively, you may bind index.html to the landing page of a local webserver, specifiying a port to use e.g http://localhost:8080. 
 
 > SSL certificates were not generated for this project, so there is no https authentication/support.
+
 
 ### Prerequisites
 
@@ -15,9 +16,9 @@ Some basic of Tower Defense games would be useful in knowing the typical formula
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [JavaScript] - Utilising the latest ECMAScript 8 (https://en.wikipedia.org/wiki/ECMAScript#9th_Edition_-_ECMAScript_2018)
+* [JQuery] - DOM tree traversal simplification (https://jquery.com/)
+* [p5js] - Facilitating 'visual coding' i.e canvas operations (https://p5js.org/)
 
 ## Authors
 
@@ -25,7 +26,7 @@ Some basic of Tower Defense games would be useful in knowing the typical formula
 
 ## License
 
-This project is unlicensed, and you may use it freely - please give credit to the author when doing so!
+This project is unlicensed, and you may use it freely - please give credit when doing so!
 
 ## Acknowledgments
 
