@@ -15,7 +15,7 @@ Since this game is purely web-based, that means getting started is simple. Clone
 
 ### Prerequisites
 
-Some basic of Tower Defense games would be useful in knowing the typical formulaic pattern of thesse games - https://en.wikipedia.org/wiki/Tower_defense. This game takes the opposite perspective in terms of gameplay, although the progression mechanics for the most part essentially remain the same.
+Some basic of Tower Defense games would be useful in knowing the typical formulaic pattern of these games - https://en.wikipedia.org/wiki/Tower_defense. This game takes the opposite perspective in terms of gameplay, although the progression mechanics for the most part essentially remain the same.
 
 ## Built With
 
